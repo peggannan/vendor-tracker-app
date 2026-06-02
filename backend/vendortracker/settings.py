@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import dj_database_url
 from pathlib import Path
 import os 
 from dotenv import load_dotenv
@@ -61,6 +62,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -92,16 +94,22 @@ WSGI_APPLICATION = 'vendortracker.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+# Database
+# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
-    }
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+        # This tells Django to use SSL but not to be too picky about the certificate
+        ssl_require=True if os.getenv('DATABASE_URL') and 'render.com' in os.getenv('DATABASE_URL') else False
+    )
 }
+
+# If we are on Render (NOT Debug mode), force the SSL requirement
+if not DEBUG:
+    DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
+print(f"--- CONNECTED TO: {DATABASES['default']['HOST']} ---")
 
 
 # Password validation
