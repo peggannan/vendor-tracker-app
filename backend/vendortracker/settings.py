@@ -97,14 +97,29 @@ WSGI_APPLICATION = 'vendortracker.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+
+
+
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL'),
-        conn_max_age=600,
-        # This tells Django to use SSL but not to be too picky about the certificate
-        ssl_require=True if os.getenv('DATABASE_URL') and 'render.com' in os.getenv('DATABASE_URL') else False
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'schedo',
+        'USER': 'postgres',
+        'PASSWORD': 'password',
+        'HOST': 'localhost',  # or your database host
+        'PORT': '5432',       # default PostgreSQL port
+    }
 }
+
+
+
+
+
+database_url = os.environ.get("DATABASE_URL")
+
+DATABASES["default"] = dj_database_url.parse(database_url)
+
+
 
 # If we are on Render (NOT Debug mode), force the SSL requirement
 if not DEBUG:
