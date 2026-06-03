@@ -1,12 +1,9 @@
-// src/api/api.js
 import axios from "axios";
-import {
-  mockUser, mockToken, mockStats, mockProducts, mockSales, mockCustomers
-} from "./mockApi";
+import { mockUser, mockToken, mockStats, mockProducts, mockSales, mockCustomers } from "./mockApi";
 
-const USE_MOCK = true; // 👈 flip to false when backend is ready
+const USE_MOCK = true;
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const BASE_URL = import.meta.env.VITE_API_URL || "https://vendor-tracker-app.onrender.com";
 
 const api = axios.create({ baseURL: BASE_URL });
 
@@ -20,113 +17,75 @@ const delay = (ms = 400) => new Promise((res) => setTimeout(res, ms));
 
 // AUTH
 export const signup = async (data) => {
-  if (USE_MOCK) {
-    await delay();
-    return { data: { token: mockToken, user: mockUser } };
-  }
-  return api.post("/api/auth/signup", data);
+  if (USE_MOCK) { await delay(); return { data: { token: mockToken, user: mockUser } }; }
+  return api.post("/api/v1/auth/register/", data);
 };
 
 export const login = async (data) => {
-  if (USE_MOCK) {
-    await delay();
-    return { data: { token: mockToken, user: mockUser } };
-  }
-  return api.post("/api/auth/login", data);
+  if (USE_MOCK) { await delay(); return { data: { token: mockToken, user: mockUser } }; }
+  return api.post("/api/v1/auth/login/", data);
 };
 
 export const logout = async () => {
   if (USE_MOCK) { await delay(); return; }
-  return api.post("/api/auth/logout");
+  return api.post("/api/v1/auth/logout/");
 };
 
 // PRODUCTS
 export const getProducts = async () => {
-  if (USE_MOCK) {
-    await delay();
-    return { data: { products: mockProducts } };
-  }
-  return api.get("/api/products");
+  if (USE_MOCK) { await delay(); return { data: { products: mockProducts } }; }
+  return api.get("/api/v1/products/");
 };
 
 export const addProduct = async (data) => {
   if (USE_MOCK) {
     await delay();
-    const newProduct = { id: Date.now(), ...data };
-    mockProducts.push(newProduct);
-    return { data: { product: newProduct } };
+    const p = { id: Date.now(), ...data };
+    mockProducts.push(p);
+    return { data: { product: p } };
   }
-  return api.post("/api/products", data);
+  return api.post("/api/v1/products/", data);
 };
 
 export const editProduct = async (id, data) => {
-  if (USE_MOCK) {
-    await delay();
-    const product = { id, ...data };
-    return { data: { product } };
-  }
-  return api.put(`/api/products/${id}`, data);
+  if (USE_MOCK) { await delay(); return { data: { product: { id, ...data } } }; }
+  return api.put(`/api/v1/products/${id}/`, data);
 };
 
 export const deleteProduct = async (id) => {
-  if (USE_MOCK) {
-    await delay();
-    return { data: { message: "Product deleted" } };
-  }
-  return api.delete(`/api/products/${id}`);
+  if (USE_MOCK) { await delay(); return { data: { message: "Deleted" } }; }
+  return api.delete(`/api/v1/products/${id}/`);
 };
 
 // INVENTORY
 export const getInventory = async () => {
-  if (USE_MOCK) {
-    await delay();
-    return { data: { products: mockProducts } };
-  }
-  return api.get("/api/inventory");
+  if (USE_MOCK) { await delay(); return { data: { products: mockProducts } }; }
+  return api.get("/api/v1/products/");
 };
 
 export const updateStock = async (id, stock) => {
-  if (USE_MOCK) {
-    await delay();
-    return { data: { product: { id, stock } } };
-  }
-  return api.put(`/api/inventory/${id}`, { stock });
+  if (USE_MOCK) { await delay(); return { data: { product: { id, stock } } }; }
+  return api.patch(`/api/v1/products/${id}/`, { stock });
 };
 
 // SALES
 export const recordSale = async (data) => {
   if (USE_MOCK) {
     await delay();
-    return { data: { sale: { id: Date.now(), ...data, total: 20, created_at: new Date().toISOString() } } };
+    return { data: { sale: { id: Date.now(), ...data, created_at: new Date().toISOString() } } };
   }
-  return api.post("/api/sales", data);
+  return api.post("/api/v1/sales/", data);
 };
 
 export const getSalesHistory = async () => {
-  if (USE_MOCK) {
-    await delay();
-    return { data: { sales: mockSales } };
-  }
-  return api.get("/api/sales");
-};
-
-// DASHBOARD
-export const getDashboard = async () => {
-  if (USE_MOCK) {
-    await delay();
-    return { data: mockStats };
-  }
-  return api.get("/api/dashboard");
+  if (USE_MOCK) { await delay(); return { data: { sales: mockSales } }; }
+  return api.get("/api/v1/sales/");
 };
 
 // CUSTOMERS
-
 export const getCustomers = async () => {
-  if (USE_MOCK) {
-    await delay();
-    return { data: { customers: mockCustomers } };
-  }
-  return api.get("/api/customers");
+  if (USE_MOCK) { await delay(); return { data: { customers: mockCustomers } }; }
+  return api.get("/api/v1/customers/");
 };
 
 export const addCustomer = async (data) => {
@@ -134,58 +93,71 @@ export const addCustomer = async (data) => {
     await delay();
     return { data: { customer: { id: Date.now(), ...data, purchases: 0, total: 0, credit_owed: 0 } } };
   }
-  return api.post("/api/customers", data);
+  return api.post("/api/v1/customers/", data);
 };
 
 export const editCustomer = async (id, data) => {
-  if (USE_MOCK) {
-    await delay();
-    return { data: { customer: { id, ...data } } };
-  }
-  return api.put(`/api/customers/${id}`, data);
+  if (USE_MOCK) { await delay(); return { data: { customer: { id, ...data } } }; }
+  return api.put(`/api/v1/customers/${id}/`, data);
 };
 
+// CREDITS
+export const getCredits = async () => {
+  if (USE_MOCK) { await delay(); return { data: { credits: [] } }; }
+  return api.get("/api/v1/credits/");
+};
 
+// DASHBOARD — no endpoint yet, built from other endpoints
+export const getDashboard = async () => {
+  if (USE_MOCK) { await delay(); return { data: mockStats }; }
 
+  try {
+    const [salesRes, productsRes, customersRes] = await Promise.all([
+      api.get("/api/v1/sales/"),
+      api.get("/api/v1/products/"),
+      api.get("/api/v1/customers/"),
+    ]);
 
+    const sales = salesRes.data?.results ?? salesRes.data?.sales ?? salesRes.data ?? [];
+    const products = productsRes.data?.results ?? productsRes.data?.products ?? productsRes.data ?? [];
+    const customers = customersRes.data?.results ?? customersRes.data?.customers ?? customersRes.data ?? [];
 
+    // Calculate total revenue today
+    const today = new Date().toISOString().slice(0, 10);
+    const todaySales = sales.filter((s) => s.created_at?.slice(0, 10) === today);
+    const total_revenue = todaySales.reduce((sum, s) => sum + parseFloat(s.total || 0), 0);
 
-//---old code ---
+    // Weekly revenue
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const weeklySales = sales.filter((s) => new Date(s.created_at) >= weekAgo);
+    const weekly_revenue = weeklySales.reduce((sum, s) => sum + parseFloat(s.total || 0), 0);
 
-// //this file connects the backend to the front end and defines all the API calls that the frontend will use to interact with the backend. It uses axios to make HTTP requests to the backend endpoints, and it also handles attaching the authentication token to each request automatically. The functions defined in this file correspond to various actions like signing up, logging in, managing products, inventory, sales, and fetching dashboard data.
+    // Top product
+    const productMap = {};
+    sales.forEach((s) => {
+      const name = s.product_name ?? s.product ?? "Unknown";
+      if (!productMap[name]) productMap[name] = 0;
+      productMap[name] += parseInt(s.quantity || 1);
+    });
+    const topEntry = Object.entries(productMap).sort((a, b) => b[1] - a[1])[0];
+    const top_product = topEntry ? { name: topEntry[0], units_sold: topEntry[1] } : null;
 
+    // Low stock
+    const low_stock = products.filter((p) => parseInt(p.stock ?? p.quantity ?? 0) <= 5);
 
-// import axios from "axios";
-
-// const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"; //replace with backend url
-
-// const api = axios.create({ baseURL: BASE_URL });
-
-// // Attach token to every request automatically
-// api.interceptors.request.use((config) => {
-//   const token = localStorage.getItem("token");
-//   if (token) config.headers.Authorization = `Bearer ${token}`;
-//   return config;
-// });
-
-// // AUTH
-// export const signup = (data) => api.post("/api/auth/signup", data);
-// export const login = (data) => api.post("/api/auth/login", data);
-// export const logout = () => api.post("/api/auth/logout");
-
-// // PRODUCTS
-// export const getProducts = () => api.get("/api/products");
-// export const addProduct = (data) => api.post("/api/products", data);
-// export const editProduct = (id, data) => api.put(`/api/products/${id}`, data);
-// export const deleteProduct = (id) => api.delete(`/api/products/${id}`);
-
-// // INVENTORY
-// export const getInventory = () => api.get("/api/inventory");
-// export const updateStock = (id, stock) => api.put(`/api/inventory/${id}`, { stock });
-
-// // SALES
-// export const recordSale = (data) => api.post("/api/sales", data);
-// export const getSalesHistory = () => api.get("/api/sales");
-
-// // DASHBOARD
-// export const getDashboard = () => api.get("/api/dashboard");
+    return {
+      data: {
+        total_revenue: total_revenue.toFixed(2),
+        weekly_revenue: weekly_revenue.toFixed(2),
+        weekly_change: 0,
+        total_customers: customers.length,
+        top_product,
+        low_stock,
+      }
+    };
+  } catch (err) {
+    console.error("Dashboard error:", err);
+    return { data: { total_revenue: 0, weekly_revenue: 0, weekly_change: 0, total_customers: 0, top_product: null, low_stock: [] } };
+  }
+};

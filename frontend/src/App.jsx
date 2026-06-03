@@ -6,7 +6,7 @@ import Onboarding from "./pages/Onboarding";
 import UserProfile from "./pages/UserProfile";
 import Notifications from "./pages/Notifications";
 import ProductDetail from "./pages/ProductDetail";
-import SaleDetail from "./pages/SaleDetail";
+import TransactionDetail from "./pages/TransactionDetail";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -42,7 +42,7 @@ export default function App() {
             <Route path="/settings" element={<Settings />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/products/:id" element={<ProductDetail />} />
-            <Route path="/sales/:id" element={<SaleDetail />} />
+            <Route path="/transactions/:id" element={<TransactionDetail />} />
             <Route path="/customers/new" element={<AddCustomer />} />
             <Route path="/customers/:id" element={<CustomerDetail />} />
             

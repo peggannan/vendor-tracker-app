@@ -276,7 +276,7 @@ export default function Dashboard() {
                     </div>
                     <div>
                      <p className="font-bold text-gray-800 dark:text-white text-sm">
-                      {sale.product_name}
+                      {sale.customer_name ?? sale.product_name}
                     </p>
                     <p className="text-xs text-gray-400 dark:text-gray-500">
                       {sale.product_name} (x{sale.quantity})
