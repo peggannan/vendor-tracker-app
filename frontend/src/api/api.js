@@ -353,12 +353,37 @@ export const updateStock = async (id, stock) => {
 
 // ─── SALES ───────────────────────────────────────────────
 
+// export const recordSale = async (data) => {
+//   if (USE_MOCK) {
+//     await delay();
+//     return { data: { sale: { id: Date.now(), ...data, created_at: new Date().toISOString() } } };
+//   }
+//   const res = await api.post("/api/v1/sales/", data);
+//   return { data: { sale: res.data.data ?? res.data } };
+// };
+
 export const recordSale = async (data) => {
   if (USE_MOCK) {
     await delay();
     return { data: { sale: { id: Date.now(), ...data, created_at: new Date().toISOString() } } };
   }
-  const res = await api.post("/api/v1/sales/", data);
+
+  const paymentMap = {
+    "CASH": "cash",
+    "MOBILE MONEY": "momo",
+    "CARD": "cash",
+    "CREDIT": "cash",
+  };
+
+  const res = await api.post("/api/v1/sales/", {
+    customer_id: data.customer_id || null,
+    payment_method: paymentMap[data.payment_method?.toUpperCase()] ?? "cash",
+    items: [{
+      product_id: parseInt(data.product_id),
+      quantity: parseInt(data.quantity),
+    }],
+  });
+
   return { data: { sale: res.data.data ?? res.data } };
 };
 
@@ -372,7 +397,7 @@ export const getSalesHistory = async () => {
     customer_name: s.customer_name ?? s.customer?.name ?? null,
     quantity: s.quantity,
     total: s.total ?? s.total_price,
-    payment_method: s.payment_method ?? "CASH",
+    payment_method: s.payment_method ?? "cash",
     staff_name: s.staff_name ?? s.recorded_by ?? null,
     status: s.status ?? "Approved",
     created_at: s.created_at,
