@@ -75,6 +75,9 @@ import Header from "../components/Header";
 import Navbar from "../components/Navbar";
 import { ListSkeleton } from "../components/Skeleton";
 import EmptyState from "../components/EmptyState";
+import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 function StatusBadge({ status }) {
   const styles = {
@@ -155,6 +158,20 @@ export default function SalesHistory() {
       <PageHeader title="Transactions" />
 
       <div className="px-4 pt-4">
+
+        {/* Page title + Record Sale */}
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Transactions</h1>
+          <button
+            onClick={() => navigate("/record-sale")}
+            className="flex items-center gap-1.5 bg-brand-600 text-white text-xs font-bold px-4 py-2.5 rounded-full"
+          >
+            <FontAwesomeIcon icon={faPlus} className="text-xs" />
+            Record Sale
+          </button>
+        </div>
+
+        {/* Summary pills */}
 
         {/* Summary pills */}
         <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
