@@ -13,20 +13,26 @@ export default function Login() {
   const { saveAuth } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    try {
-      const { data } = await login(form);
-      saveAuth(data.username, data.token);
-      navigate("/dashboard");
-    } catch (err) {
-      setError(err.response?.data?.message || "Wrong Email or Password");
-    } finally {
-      setLoading(false);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError("");
+  try {
+    const { data } = await login(form);
+    saveAuth(data.user, data.token);  // ← fix: data.user not data.username
+    navigate("/dashboard");
+  } catch (err) {
+    const errData = err.response?.data?.error?.message;
+    if (errData) {
+      const firstError = Object.values(errData)[0];
+      setError(Array.isArray(firstError) ? firstError[0] : firstError);
+    } else {
+      setError("Wrong username or password");
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen min-w-screen dark:bg-gray-900 bg-gradient-to-b from-brand-500 to-brand-600 flex flex-col justify-end max-w-sm mx-auto">

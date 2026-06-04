@@ -209,7 +209,7 @@ export const signup = async (data) => {
 export const login = async (data) => {
   if (USE_MOCK) { await delay(); return { data: { token: mockToken, user: mockUser } }; }
   const res = await api.post("/api/v1/auth/login/", {
-    username: data.email, // backend uses username field
+    username: data.username, // backend uses username field
     password: data.password,
   });
   // backend returns: { data: { access_token, refresh_token, user: { id, username, email } } }
@@ -342,27 +342,6 @@ export const restockProduct = async (id, quantity, cost_price) => {
   return api.post(`/api/v1/products/${id}/restock/`, { quantity, cost_price });
 };
 
-const handleSave = async () => {
-  setSaving(true);
-  try {
-    const { data } = await editProduct(id, form);
-    // merge the returned product with current form so UI reflects changes
-    const updated = {
-      ...form,
-      ...data.product,
-      price: data.product.price ?? form.price,
-      stock: data.product.stock ?? form.stock,
-      base_cost: data.product.base_cost ?? form.base_cost,
-    };
-    setProduct(updated);
-    setForm(updated);
-    setEditing(false);
-  } catch (err) {
-    alert(err.response?.data?.error?.message || "Could not save changes");
-  } finally {
-    setSaving(false);
-  }
-};
 
 // ─── INVENTORY ───────────────────────────────────────────
 
