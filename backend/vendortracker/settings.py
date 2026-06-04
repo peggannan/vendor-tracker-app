@@ -182,9 +182,17 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
-# CORS
+ #CORS
 CORS_ALLOWED_ORIGINS = [
-    os.getenv('FRONTEND_URL', 'http://localhost:3000'),
+    "http://localhost:5173",                 # Local Vite/React dev
+    "http://localhost:3000",                 # Alternative local port
+    "https://vendor-tracker-app.vercel.app", #live frontend
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "https://vendor-tracker-app.vercel.app",
+    "https://vendor-tracker-app.onrender.com"
 ]
 
 MEDIA_URL = '/media/'
