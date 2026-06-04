@@ -391,20 +391,47 @@ export const recordSale = async (data) => {
 
 export const getSalesHistory = async () => {
   if (USE_MOCK) { await delay(); return { data: { sales: mockSales } }; }
+  
+  // fetch list + individual details to get product names
   const res = await api.get("/api/v1/sales/");
-  const raw = res.data.data ?? res.data.results ?? res.data ?? [];
-  const sales = raw.map((s) => ({
-    id: s.id,
-    product_name: s.product_name ?? s.product?.name ?? "Unknown",
-    customer_name: s.customer_name ?? s.customer?.name ?? null,
-    quantity: s.quantity,
-    total: s.total ?? s.total_price,
-    payment_method: s.payment_method ?? "cash",
-    staff_name: s.staff_name ?? s.recorded_by ?? null,
-    status: s.status ?? "Approved",
-    created_at: s.created_at,
-    product_image: s.product_image ?? s.product?.image ?? null,
-  }));
+  const raw = res.data.data ?? res.data.results ?? [];
+
+  // for each sale fetch detail to get items with product names
+  const detailed = await Promise.all(
+    raw.map(async (s) => {
+      try {
+        const detail = await api.get(`/api/v1/sales/${s.id}/`);
+        return { ...s, ...detail.data.data };
+      } catch {
+        return s;
+      }
+    })
+  );
+
+  const sales = detailed.map((s) => {
+    const firstItem = s.items?.[0] ?? s.sale_items?.[0];
+    return {
+      id: s.id,
+      customer_name: s.customer_name ?? null,
+      customer_id: s.customer_id ?? null,
+      product_name: firstItem?.product_name ?? "Unknown Product",
+      quantity: firstItem?.quantity ?? 1,
+      total: parseFloat(s.sale_total ?? s.total ?? 0),
+      payment_method: s.payment_method === "momo"
+        ? "MOBILE MONEY"
+        : s.payment_method?.toUpperCase() ?? "CASH",
+      staff_name: s.customer_name ?? null,
+      status: s.status === "completed"
+        ? "Approved"
+        : s.status === "cancelled"
+        ? "Rejected"
+        : "Pending",
+      created_at: s.created_at,
+      product_image: null,
+      items: s.items ?? s.sale_items ?? [],
+    };
+  });
+
   return { data: { sales } };
 };
 
@@ -488,15 +515,28 @@ export const getDashboard = async () => {
       ? parseFloat(((weekly_revenue - prev_weekly) / prev_weekly * 100).toFixed(1))
       : 0;
 
-    // Top product by sales count
+    // Top product — built from all items across all sales
     const productMap = {};
     sales.forEach((s) => {
-      const name = s.product_name ?? "Unknown";
-      if (!productMap[name]) productMap[name] = 0;
-      productMap[name] += parseInt(s.quantity || 1);
+      if (s.status !== "Approved") return;
+      if (s.items && s.items.length > 0) {
+        s.items.forEach((item) => {
+          const name = item.product_name ?? "Unknown";
+          if (name === "Unknown") return;
+          if (!productMap[name]) productMap[name] = 0;
+          productMap[name] += parseInt(item.quantity || 1);
+        });
+      } else if (s.product_name && s.product_name !== "Unknown") {
+        if (!productMap[s.product_name]) productMap[s.product_name] = 0;
+        productMap[s.product_name] += parseInt(s.quantity || 1);
+      }
     });
-    const topEntry = Object.entries(productMap).sort((a, b) => b[1] - a[1])[0];
-    const top_product = topEntry ? { name: topEntry[0], units_sold: topEntry[1] } : null;
+    const topEntry = Object.entries(productMap)
+      .filter(([name]) => name !== "Unknown")
+      .sort((a, b) => b[1] - a[1])[0];
+    const top_product = topEntry
+      ? { name: topEntry[0], units_sold: topEntry[1] }
+      : null;
 
     // Low stock from products
     const low_stock = products

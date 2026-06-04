@@ -175,83 +175,6 @@ export default function Dashboard() {
           )}
         </div>
 
-          {/* Today */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Today</p>
-            <p className="text-2xl font-bold text-gray-800 dark:text-white">
-              {loading ? "—" : `₵ ${stats?.total_revenue ?? 0}`}
-            </p>
-            <p className="text-xs text-gray-400 mt-1">Daily Total</p>
-          </div>
-
-          {/* This Week */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">This Week</p>
-            <p className="text-2xl font-bold text-gray-800 dark:text-white">
-              {loading ? "—" : `₵ ${stats?.weekly_revenue ?? 0}`}
-            </p>
-            {!loading && (
-              <div className="flex items-center gap-1 mt-1">
-                {(stats?.weekly_change ?? 0) >= 0 ? (
-                  <>
-                    <svg width="12" height="12" fill="none" stroke="#16a34a" strokeWidth="2.5">
-                      <path d="M6 9V2M2 6l4-4 4 4" />
-                    </svg>
-                    <span className="text-xs text-green-500 font-medium">
-                      {stats?.weekly_change ?? 0}% increase
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <svg width="12" height="12" fill="none" stroke="#dc2626" strokeWidth="2.5">
-                      <path d="M6 2v7M2 6l4 4 4-4" />
-                    </svg>
-                    <span className="text-xs text-red-500 font-medium">
-                      {stats?.weekly_change ?? 0}% decrease
-                    </span>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Low Stock */}
-          <div className={`rounded-2xl p-4 shadow-sm border ${stats?.low_stock?.length > 0 ? "bg-red-50 dark:bg-red-950 border-red-100 dark:border-red-900" : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700"}`}>
-            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Low Stock</p>
-            {loading ? (
-              <p className="text-gray-400 text-sm">—</p>
-            ) : stats?.low_stock?.length > 0 ? (
-              <>
-                <p className="text-base font-bold text-gray-800 dark:text-gray-100 leading-tight">
-                  {stats.low_stock[0].name}
-                </p>
-                <div className="flex items-center gap-1 mt-1">
-                  <svg width="12" height="12" fill="none" stroke="#ef4444" strokeWidth="2">
-                    <path d="M6 2l4.5 8H1.5L6 2z" />
-                    <line x1="6" y1="6" x2="6" y2="7.5" />
-                  </svg>
-                  <span className="text-xs text-red-500 font-medium">
-                    {stats.low_stock[0].stock} items depleted
-                  </span>
-                </div>
-              </>
-            ) : (
-              <p className="text-sm text-green-600 font-medium">All stocked</p>
-            )}
-          </div>
-
-          {/* Total Customers */}
-          <div
-            onClick={() => navigate("/customers")}
-            className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer active:scale-[0.98] transition-transform"
-          >
-            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Total Customers</p>
-            <p className="text-2xl font-bold text-gray-800 dark:text-white">
-              {loading ? "—" : stats?.total_customers ?? 0}
-            </p>
-            <p className="text-xs text-gray-400 mt-1">Unique accounts logged</p>
-          </div>
-
         {/* Highlight Top Match banner */}
         {stats?.top_product && (
           <div className="bg-gray-900 dark:bg-gray-950 rounded-2xl p-4 mb-5 flex items-center justify-between overflow-hidden relative">
@@ -320,7 +243,7 @@ export default function Dashboard() {
                       {sale.created_at?.slice(0, 10)}
                     </span>
                   </div>
-                  <span className="text-xs text-gray-400">ID: TX-{sale.id}</span>
+                  <span className="text-xs text-gray-400 font-medium">#{sale.id}</span>
                 </div>
 
                 {/* Middle row — product image + name + amount */}
@@ -341,12 +264,12 @@ export default function Dashboard() {
                       )}
                     </div>
                     <div>
-                     <p className="font-bold text-gray-800 dark:text-white text-sm">
-                      {sale.customer_name ?? sale.product_name}
-                    </p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500">
-                      {sale.product_name} (x{sale.quantity})
-                    </p>
+                      <p className="font-bold text-gray-800 dark:text-white text-sm">
+                        {sale.product_name}
+                      </p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">
+                        {sale.customer_name ? `By: ${sale.customer_name}` : "Walk-in"} · x{sale.quantity}
+                      </p>
                     </div>
                   </div>
                   <div className="text-right">
