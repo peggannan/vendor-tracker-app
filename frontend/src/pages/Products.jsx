@@ -7,9 +7,6 @@ import PageHeader from "../components/PageHeader";
 import Navbar from "../components/Navbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisVertical, faPlus, faMagnifyingGlass, faXmark } from "@fortawesome/free-solid-svg-icons";
-import { ListSkeleton } from "../components/Skeleton";
-import EmptyState from "../components/EmptyState";
-
 
 const CATEGORIES = ["All", "Groceries", "Beverages", "Electronics", "Apparel"];
 

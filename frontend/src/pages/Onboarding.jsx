@@ -37,7 +37,7 @@ return (
       {/* Logo */}
       <div className="flex items-center gap-2 mb-8 lg:mb-12">
         <img src={logo} alt="logo" className="w-10 h-10 object-contain" />
-        <span className="text-xl font-black tracking-wide">Shelfline</span>
+        <span className="text-xl font-black tracking-wide">Shelfy</span>
       </div>
 
       {/* Illustration */}
