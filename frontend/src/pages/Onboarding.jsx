@@ -29,7 +29,7 @@ export default function Onboarding() {
   const isLast = slide === slides.length - 1;
 
 return (
-  <div className="h-screen w-screen bg-gradient-to-b from-brand-500 to-brand-700 flex flex-col items-center justify-between px-6 py-12 text-white max-w-sm mx-auto overflow-hidden">
+  <div className="min-h-screen min-w-screen dark:bg-gray-900 bg-gradient-to-b from-brand-500 to-brand-700 flex flex-col items-center justify-between px-6 py-12 text-white max-w-sm mx-auto overflow-hidden lg:max-w-full">
 
     {/* Illustration */}
     <div className="flex-1 flex items-center justify-center w-full">

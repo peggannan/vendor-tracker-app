@@ -73,6 +73,8 @@ import { getSalesHistory } from "../api/api";
 import PageHeader from "../components/PageHeader";
 import Header from "../components/Header";
 import Navbar from "../components/Navbar";
+import { ListSkeleton } from "../components/Skeleton";
+import EmptyState from "../components/EmptyState";
 
 function StatusBadge({ status }) {
   const styles = {
@@ -148,7 +150,7 @@ export default function SalesHistory() {
   const pendingCount = sales.filter((s) => s.status === "Pending").length;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 max-w-lg mx-auto">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 max-w-lg mx-auto lg:max-w-full">
       <Header />
       <PageHeader title="Transactions" />
 
@@ -227,9 +229,9 @@ export default function SalesHistory() {
 
         {/* Transaction cards */}
         {loading ? (
-          <p className="text-gray-400 text-sm text-center py-8">Loading...</p>
+          <ListSkeleton count={4} type="transaction" />
         ) : filtered.length === 0 ? (
-          <p className="text-gray-400 text-sm text-center py-8">No transactions found</p>
+          <EmptyState type={search || statusFilter !== "All" ? "search" : "transactions"} />
         ) : (
           <div className="flex flex-col gap-3">
             {filtered.map((sale) => (

@@ -10,6 +10,8 @@ import {
   faPhone, faEnvelope, faTrophy,
   faMagnifyingGlass, faUserPlus, faTriangleExclamation
 } from "@fortawesome/free-solid-svg-icons";
+import { ListSkeleton } from "../components/Skeleton";
+import EmptyState from "../components/EmptyState";
 
 const LOYALTY_RANKS = [
   { label: "ELITE BRONZE", min: 0, color: "text-amber-600" },
@@ -46,7 +48,7 @@ export default function Customers() {
   const topRank = topCustomer ? getLoyaltyRank(topCustomer.purchases) : null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 max-w-lg mx-auto">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 max-w-lg mx-auto lg:max-w-full">
       <Header />
       <PageHeader title="Customers" />
 
@@ -126,9 +128,9 @@ export default function Customers() {
 
         {/* Customer list */}
         {loading ? (
-          <p className="text-gray-400 text-sm text-center py-8">Loading...</p>
+          <ListSkeleton count={4} type="customer" />
         ) : filtered.length === 0 ? (
-          <p className="text-gray-400 text-sm text-center py-8">No customers found</p>
+          <EmptyState type={search ? "search" : "customers"} />
         ) : (
           <div className="flex flex-col gap-3">
             {filtered.map((c) => {

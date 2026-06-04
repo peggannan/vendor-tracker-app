@@ -22,7 +22,7 @@ export default function Signup() {
     setLoading(true);
     setError("");
     try {
-      const { data } = await signup({ name: form.name, email: form.email, password: form.password });
+      const { data } = await signup({ username: form.name, email: form.email, password: form.password });
       saveAuth(data.user, data.token);
       navigate("/user-profile");
     } catch (err) {
@@ -33,7 +33,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-white dark:bg-gray-900 max-w-sm mx-auto">
+    <div className="min-h-screen min-w-screen flex flex-col items-center justify-center px-6 bg-white dark:bg-gray-900 max-w-sm mx-auto lg:max-w-full">
 
       {/* Logo */}
       <div className="flex flex-col items-center mb-6">
@@ -46,7 +46,7 @@ export default function Signup() {
 
         {/* Name + Email */}
         {[
-          { label: "Name", key: "name", type: "text", placeholder: "Enter Your Name" },
+          { label: "Username", key: "name", type: "text", placeholder: "Enter Your Username" },
           { label: "Email", key: "email", type: "email", placeholder: "Enter Your Email" },
         ].map(({ label, key, type, placeholder }) => (
           <div key={key}>

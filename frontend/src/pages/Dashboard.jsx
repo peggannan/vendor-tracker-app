@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { getDashboard, getSalesHistory } from "../api/api";
 import Header from "../components/Header";
 import Navbar from "../components/Navbar";
+import { ListSkeleton, StatSkeleton } from "../components/Skeleton";
+import EmptyState from "../components/EmptyState";
 
 // Status badge component
 function StatusBadge({ status }) {
@@ -78,7 +80,7 @@ export default function Dashboard() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 max-w-lg mx-auto">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 max-w-lg mx-auto lg:max-w-full">
       <Header />
 
       <div className="px-4 pt-5">
@@ -105,7 +107,15 @@ export default function Dashboard() {
         </div>
 
         {/* 4 Stat Cards */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
+          {loading ? (
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <StatSkeleton /><StatSkeleton /><StatSkeleton /><StatSkeleton />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              {/* ... existing stat cards ... */}
+            </div>
+          )}
 
           {/* Today */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
@@ -183,8 +193,6 @@ export default function Dashboard() {
             </p>
             <p className="text-xs text-gray-400 mt-1">Unique accounts logged</p>
           </div>
-
-        </div>
 
         {/* Highlight Top Match banner */}
         {stats?.top_product && (

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import PageHeader from "../components/PageHeader";
 import Navbar from "../components/Navbar";
+import EmptyState from "../components/EmptyState";
 
 export default function Notifications() {
   const [alerts, setAlerts] = useState([]);
@@ -52,22 +53,14 @@ export default function Notifications() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 max-w-lg mx-auto">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 max-w-lg mx-auto lg:max-w-full">
       <PageHeader title="Notifications" />
 
       <div className="px-4 pt-4">
         {loading ? (
           <p className="text-gray-400 text-sm text-center py-8">Loading...</p>
         ) : alerts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mb-3">
-              <svg width="24" height="24" fill="none" stroke="#16a34a" strokeWidth="2">
-                <path d="M20 6L9 17l-5-5" />
-              </svg>
-            </div>
-            <p className="font-semibold text-gray-700 dark:text-gray-200">All clear!</p>
-            <p className="text-sm text-gray-400 mt-1">No alerts right now</p>
-          </div>
+          <EmptyState type="notifications" />
         ) : (
           <div className="flex flex-col gap-3">
             {alerts.map((alert) => (

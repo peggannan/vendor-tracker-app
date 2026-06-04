@@ -7,7 +7,7 @@ import { login } from "../api/api";
 import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { saveAuth } = useAuth();
@@ -29,19 +29,19 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-brand-500 to-brand-600 flex flex-col justify-end max-w-sm mx-auto">
+    <div className="min-h-screen min-w-screen dark:bg-gray-900 bg-gradient-to-b from-brand-500 to-brand-600 flex flex-col justify-end max-w-sm mx-auto">
       <div className="bg-white rounded-t-3xl px-6 py-8">
         <h2 className="text-2xl font-bold text-center text-gray-800">Log In</h2>
         <p className="text-gray-400 text-sm text-center mb-6">Sign in to your account</p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="text-sm text-gray-600 mb-1 block">Email</label>
+            <label className="text-sm text-gray-600 mb-1 block">Username</label>
             <input
-              type="email"
-              placeholder="My Email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              type="username"
+              placeholder="My Username"
+              value={form.username}
+              onChange={(e) => setForm({ ...form, username: e.target.value })}
               className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none ${error ? "border-red-400" : "border-gray-200 focus:border-brand-500"}`}
               required
             />

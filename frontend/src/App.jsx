@@ -1,6 +1,7 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AppLayout from "./components/AppLayout";
 
 import Onboarding from "./pages/Onboarding";
 import UserProfile from "./pages/UserProfile";
@@ -32,20 +33,21 @@ export default function App() {
 
           {/* Protected routes — must be logged in */}
           <Route element={<ProtectedRoute />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/record-sale" element={<RecordSale />} />
-            <Route path="/user-profile" element={<UserProfile />} />
-            <Route path="/transactions" element={<Transactions />} />
-            <Route path="/customers" element={<Customers />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/products/:id" element={<ProductDetail />} />
-            <Route path="/transactions/:id" element={<TransactionDetail />} />
-            <Route path="/customers/new" element={<AddCustomer />} />
-            <Route path="/customers/:id" element={<CustomerDetail />} />
-            
+            <Route element={<AppLayout><Outlet /></AppLayout>}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/products/:id" element={<ProductDetail />} />
+              <Route path="/record-sale" element={<RecordSale />} />
+              <Route path="/transactions" element={<Transactions />} />
+              <Route path="/transactions/:id" element={<TransactionDetail />} />
+              <Route path="/customers" element={<Customers />} />
+              <Route path="/customers/new" element={<AddCustomer />} />
+              <Route path="/customers/:id" element={<CustomerDetail />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/user-profile" element={<UserProfile />} />
+            </Route>
           </Route>
 
           <Route path="*" element={<Navigate to="/" />} />

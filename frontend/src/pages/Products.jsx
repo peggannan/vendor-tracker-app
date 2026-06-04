@@ -7,6 +7,10 @@ import PageHeader from "../components/PageHeader";
 import Navbar from "../components/Navbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisVertical, faPlus, faMagnifyingGlass, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { ListSkeleton } from "../components/Skeleton";
+import EmptyState from "../components/EmptyState";
+
+
 const CATEGORIES = ["All", "Groceries", "Beverages", "Electronics", "Apparel"];
 
 function ProductModal({ product, onClose, onSave }) {
@@ -255,9 +259,12 @@ export default function Products() {
 
         {/* Product list */}
         {loading ? (
-          <p className="text-gray-400 text-sm text-center py-8">Loading...</p>
+          <ListSkeleton count={4} type="card" />
         ) : filtered.length === 0 ? (
-          <p className="text-gray-400 text-sm text-center py-8">No products in this category</p>
+          <EmptyState
+            type={search || activeCategory !== "All" ? "search" : "products"}
+            onAction={() => setModal("add")}
+          />
         ) : (
           <div className="flex flex-col gap-3">
             {filtered.map((p) => (
