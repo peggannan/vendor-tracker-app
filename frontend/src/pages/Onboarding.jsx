@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import onboard1 from "../assets/onboarding1.svg";
 import onboard2 from "../assets/onboarding2.svg";
 import onboard3 from "../assets/onboarding3.svg";
-import logos from "../assets/logos.svg";
+import logos from "../assets/logos.png";
 
 const slides = [
   {
