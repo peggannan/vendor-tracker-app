@@ -106,16 +106,74 @@ export default function Dashboard() {
           </button> */}
         </div>
 
-        {/* 4 Stat Cards */}
+        {/* 4 Stat Pills */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
           {loading ? (
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <StatSkeleton /><StatSkeleton /><StatSkeleton /><StatSkeleton />
-            </div>
+            <><StatSkeleton /><StatSkeleton /><StatSkeleton /><StatSkeleton /></>
           ) : (
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              {/* ... existing stat cards ... */}
-            </div>
+            <>
+              {/* Today */}
+              <div className="bg-brand-600 rounded-2xl p-4">
+                <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider mb-1">Today</p>
+                <p className="text-xl font-bold text-white">₵{stats?.total_revenue ?? 0}</p>
+                <p className="text-xs text-white/60 mt-0.5">Daily Total</p>
+              </div>
+
+              {/* This Week */}
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">This Week</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">₵{stats?.weekly_revenue ?? 0}</p>
+                <div className="flex items-center gap-1 mt-0.5">
+                  {(stats?.weekly_change ?? 0) >= 0 ? (
+                    <>
+                      <svg width="10" height="10" fill="none" stroke="#16a34a" strokeWidth="2.5"><path d="M5 8V2M2 5l3-3 3 3" /></svg>
+                      <span className="text-xs text-green-500 font-medium">{stats?.weekly_change ?? 0}%</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg width="10" height="10" fill="none" stroke="#dc2626" strokeWidth="2.5"><path d="M5 2v6M2 5l3 3 3-3" /></svg>
+                      <span className="text-xs text-red-500 font-medium">{stats?.weekly_change ?? 0}%</span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Low Stock */}
+              <div className={`rounded-2xl p-4 shadow-sm border ${
+                stats?.low_stock?.length > 0
+                  ? "bg-red-50 dark:bg-red-950 border-red-100 dark:border-red-900"
+                  : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700"
+              }`}>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Low Stock</p>
+                {stats?.low_stock?.length > 0 ? (
+                  <>
+                    <p className="text-sm font-bold text-gray-800 dark:text-gray-100 leading-tight">
+                      {stats.low_stock[0].name}
+                    </p>
+                    <p className="text-xs text-red-500 font-medium mt-0.5">
+                      ⚠ {stats.low_stock[0].stock} left
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-xl font-bold text-green-500">✓</p>
+                    <p className="text-xs text-green-500 mt-0.5">All stocked</p>
+                  </>
+                )}
+              </div>
+
+              {/* Total Customers */}
+              <div
+                onClick={() => navigate("/customers")}
+                className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer active:scale-[0.98] transition-transform"
+              >
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Customers</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">{stats?.total_customers ?? 0}</p>
+                <p className="text-xs text-gray-400 mt-0.5">Unique accounts</p>
+              </div>
+            </>
           )}
+        </div>
 
           {/* Today */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
@@ -317,7 +375,7 @@ export default function Dashboard() {
       </div>
 
       {/* FAB */}
-      <div className="fixed bottom-20 flex flex-col items-end gap-3 z-20" style={{ right: "max(1rem, calc((100vw - 512px) / 2 + 1rem))" }}>
+      <div className="lg:hidden fixed bottom-20 flex flex-col items-end gap-3 z-20" style={{ right: "max(1rem, calc((100vw - 512px) / 2 + 1rem))" }}>
         {fabOpen && (
           <>
             <button
@@ -351,7 +409,7 @@ export default function Dashboard() {
       </div>
 
       {fabOpen && (
-        <div className="fixed inset-0 z-10" onClick={() => setFabOpen(false)} />
+        <div className="lg:hidden fixed inset-0 z-10" onClick={() => setFabOpen(false)} />
       )}
 
       <Navbar />

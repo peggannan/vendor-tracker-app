@@ -302,6 +302,7 @@ export const addProduct = async (data) => {
   };
 };
 
+
 export const editProduct = async (id, data) => {
   if (USE_MOCK) { await delay(); return { data: { product: { id, ...data } } }; }
   const res = await api.patch(`/api/v1/products/${id}/`, {
@@ -339,6 +340,28 @@ export const deleteProduct = async (id) => {
 export const restockProduct = async (id, quantity, cost_price) => {
   if (USE_MOCK) { await delay(); return { data: {} }; }
   return api.post(`/api/v1/products/${id}/restock/`, { quantity, cost_price });
+};
+
+const handleSave = async () => {
+  setSaving(true);
+  try {
+    const { data } = await editProduct(id, form);
+    // merge the returned product with current form so UI reflects changes
+    const updated = {
+      ...form,
+      ...data.product,
+      price: data.product.price ?? form.price,
+      stock: data.product.stock ?? form.stock,
+      base_cost: data.product.base_cost ?? form.base_cost,
+    };
+    setProduct(updated);
+    setForm(updated);
+    setEditing(false);
+  } catch (err) {
+    alert(err.response?.data?.error?.message || "Could not save changes");
+  } finally {
+    setSaving(false);
+  }
 };
 
 // ─── INVENTORY ───────────────────────────────────────────
