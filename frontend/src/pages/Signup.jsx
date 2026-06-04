@@ -33,12 +33,12 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen min-w-screen dark:bg-gray-900 bg-gradient-to-b from-brand-500 to-brand-700 flex flex-col items-center justify-center px-6 max-w-sm mx-auto lg:max-w-full">
+    <div className="min-h-screen min-w-screen bg-gradient-to-b from-brand-500 to-brand-700 flex flex-col items-center justify-center px-6 max-w-sm mx-auto lg:max-w-full">
 
       {/* Logo */}
       <div className="flex flex-col items-center mb-6">
         <img src={logo} alt="logo" className="w-16 h-16 object-contain mb-2" />
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">Shelfline</h1>
+        <h1 className="text-xl font-bold text-gray-900">Shelfline</h1>
         <p className="text-gray-400 text-sm">Register Using Your Credentials</p>
       </div>
 
@@ -50,7 +50,7 @@ export default function Signup() {
           { label: "Email", key: "email", type: "email", placeholder: "Enter Your Email" },
         ].map(({ label, key, type, placeholder }) => (
           <div key={key}>
-            <label className="text-sm text-gray-600 dark:text-gray-300 mb-1 block">{label}</label>
+            <label className="text-sm text-gray-600 mb-1 block">{label}</label>
             <input
               type={type}
               placeholder={placeholder}
@@ -64,7 +64,7 @@ export default function Signup() {
 
         {/* Password */}
         <div>
-          <label className="text-sm text-gray-600 dark:text-gray-300 mb-1 block">Password</label>
+          <label className="text-sm text-gray-600 mb-1 block">Password</label>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
@@ -86,7 +86,7 @@ export default function Signup() {
 
         {/* Confirm Password */}
         <div>
-          <label className="text-sm text-gray-600 dark:text-gray-300 mb-1 block">Confirm Password</label>
+          <label className="text-sm text-gray-600 mb-1 block">Confirm Password</label>
           <div className="relative">
             <input
               type={showConfirm ? "text" : "password"}

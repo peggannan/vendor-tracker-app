@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import onboard1 from "../assets/onboarding1.svg";
 import onboard2 from "../assets/onboarding2.svg";
 import onboard3 from "../assets/onboarding3.svg";
-import logo from "../assets/logo.svg";
+import logos from "../assets/logos.svg";
 
 const slides = [
   {
@@ -36,8 +36,8 @@ return (
     <div className="lg:flex-1 flex flex-col items-center justify-center px-8 py-12 text-white">
       {/* Logo */}
       <div className="flex items-center gap-2 mb-8 lg:mb-12">
-        <img src={logo} alt="logo" className="w-10 h-10 object-contain" />
-        <span className="text-xl font-black tracking-wide">Shelfy</span>
+        <img src={logos} alt="logo" className="w-10 h-10 object-contain" />
+        <span className="text-xl font-black tracking-wide">Shelfline</span>
       </div>
 
       {/* Illustration */}
