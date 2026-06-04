@@ -19,7 +19,7 @@ export default function Login() {
     setError("");
     try {
       const { data } = await login(form);
-      saveAuth(data.user, data.token);
+      saveAuth(data.username, data.token);
       navigate("/dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Wrong Email or Password");
