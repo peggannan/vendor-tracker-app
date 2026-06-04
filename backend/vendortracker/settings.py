@@ -32,7 +32,11 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'vendor-tracker-app.onrender.com',
+    'localhost',
+    '127.0.0.1'
+]
 
 
 # Application definition
@@ -97,14 +101,29 @@ WSGI_APPLICATION = 'vendortracker.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+
+
+
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL'),
-        conn_max_age=600,
-        # This tells Django to use SSL but not to be too picky about the certificate
-        ssl_require=True if os.getenv('DATABASE_URL') and 'render.com' in os.getenv('DATABASE_URL') else False
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'schedo',
+        'USER': 'postgres',
+        'PASSWORD': 'password',
+        'HOST': 'localhost',  # or your database host
+        'PORT': '5432',       # default PostgreSQL port
+    }
 }
+
+
+
+
+
+database_url = os.environ.get("DATABASE_URL")
+
+DATABASES["default"] = dj_database_url.parse(database_url)
+
+
 
 # If we are on Render (NOT Debug mode), force the SSL requirement
 if not DEBUG:
@@ -167,9 +186,17 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
-# CORS
+ #CORS
 CORS_ALLOWED_ORIGINS = [
-    os.getenv('FRONTEND_URL', 'http://localhost:3000'),
+    "http://localhost:5173",                 # Local Vite/React dev
+    "http://localhost:3000",                 # Alternative local port
+    "https://vendor-tracker-app.vercel.app", #live frontend
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "https://vendor-tracker-app.vercel.app",
+    "https://vendor-tracker-app.onrender.com"
 ]
 
 MEDIA_URL = '/media/'
