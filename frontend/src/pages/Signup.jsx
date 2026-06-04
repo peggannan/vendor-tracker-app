@@ -33,7 +33,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen min-w-screen flex flex-col items-center justify-center px-6 bg-white dark:bg-gray-900 max-w-sm mx-auto lg:max-w-full">
+    <div className="min-h-screen min-w-screen dark:bg-gray-900 bg-gradient-to-b from-brand-500 to-brand-700 flex flex-col items-center justify-center px-6 max-w-sm mx-auto lg:max-w-full">
 
       {/* Logo */}
       <div className="flex flex-col items-center mb-6">

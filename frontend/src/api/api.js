@@ -190,7 +190,7 @@ const delay = (ms = 400) => new Promise((res) => setTimeout(res, ms));
 export const signup = async (data) => {
   if (USE_MOCK) { await delay(); return { data: { token: mockToken, user: mockUser } }; }
   const res = await api.post("/api/v1/auth/signup/", {
-    username: data.name,
+    username: data.username || data.name,
     email: data.email,
     password: data.password,
     password_confirm: data.password,
