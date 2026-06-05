@@ -408,8 +408,6 @@ export const getSalesHistory = async () => {
     })
   );
 
-  // map to get product name and other details in a consistent format for the frontend
-  //get product name from sale 
   const sales = detailed.map((s) => {
     const firstItem = s.items?.[0] ?? s.sale_items?.[0];
     return {
@@ -517,32 +515,18 @@ export const getDashboard = async () => {
       ? parseFloat(((weekly_revenue - prev_weekly) / prev_weekly * 100).toFixed(1))
       : 0;
 
-    // Top product — built from all items across all sales
-    // this is bit complex. get name of product from each sale instead of just using product_name field which may be missing or inaccurate. then using the name in the transaction details, get the quantity sold and sum it up for each product to find the top selling product. this is more accurate and also works for sales with multiple items.
-    
+    // Top product by sales count
     const productMap = {};
     sales.forEach((s) => {
-      if (s.status !== "Approved") return;
-      if (s.items && s.items.length > 0) {
-        s.items.forEach((item) => {
-          const name = item.product_name ?? "Unknown";
-          if (name === "Unknown") return;
-          if (!productMap[name]) productMap[name] = 0;
-          productMap[name] += parseInt(item.quantity || 1);
-        });
-        // 
-      } else if (s.product_name && s.product_name !== "Unknown") {
-        if (!productMap[s.product_name]) productMap[s.product_name] = 0;
-        productMap[s.product_name] += parseInt(s.quantity || 1);
-      }
+      const name = s.product_name ?? "Unknown";
+      if (!productMap[name]) productMap[name] = 0;
+      productMap[name] += parseInt(s.quantity || 1);
     });
-    const topEntry = Object.entries(productMap)
-      .filter(([name]) => name !== "Unknown")
-      .sort((a, b) => b[1] - a[1])[0];
-    const top_product = topEntry
-      ? { name: topEntry[0], units_sold: topEntry[1] }
-      : null;
+    const topEntry = Object.entries(productMap).sort((a, b) => b[1] - a[1])[0];
+    const top_product = topEntry ? { name: topEntry[0], units_sold: topEntry[1] } : null;
 
+
+    
     // Low stock from products
     const low_stock = products
       .filter((p) => p.is_low_stock || p.stock <= (p.low_stock_threshold ?? 5))
