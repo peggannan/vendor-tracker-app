@@ -169,7 +169,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 max-w-sm mx-auto lg:max-w-full">
+    <div className="min-h-screen bg-white from-brand-500 to-brand-700 flex flex-col lg:flex-row">
 
       {/* ── Left panel: illustration (desktop only) ── */}
       <div className="hidden lg:flex flex-1 flex-col items-center justify-center px-12 text-white">
