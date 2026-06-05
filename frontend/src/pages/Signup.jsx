@@ -192,8 +192,8 @@ export default function Signup() {
         {/* Logo — mobile only */}
         <div className="flex flex-col items-center mb-6 lg:hidden w-full">
           <img src={logo} alt="logo" className="w-16 h-16 object-contain mb-2" />
-          <h1 className="text-xl font-bold text-brand-600">Shelfline</h1>
-          <p className="text-brand-600/60 text-sm">Register Using Your Credentials</p>
+          <h1 className="text-xl font-bold text-gray-600">Shelfline</h1>
+          <p className="text-gray-600/60 text-sm">Register Using Your Credentials</p>
         </div>
 
         {/* Heading — desktop only */}
