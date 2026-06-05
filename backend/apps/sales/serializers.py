@@ -62,8 +62,6 @@ class SaleSerializer(serializers.ModelSerializer):
 
 class SaleListSerializer(serializers.ModelSerializer):
     customer_name = serializers.SerializerMethodField()
-    items = SaleItemSerializer(many=True, read_only=True, source='sale_items')
-
 
     class Meta:
         model = Sale
