@@ -35,6 +35,12 @@ class Product(models.Model):
     unit = models.CharField(max_length=50, choices=UNIT_CHOICES)
     unit_custom = models.CharField(max_length=50, null=True, blank=True)
     low_stock_threshold = models.IntegerField(default=5)
+    description = models.TextField(null=True, blank=True)
+    image = models.ImageField(
+        upload_to='product_images/',
+        null=True,
+        blank=True
+    )
 
     class Meta:
         db_table = 'products'

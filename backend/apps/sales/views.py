@@ -170,7 +170,7 @@ class SaleDetailView(APIView):
             return None
         
     def get(self, request, pk):
-        sale = self.get_object(pk, request.user)
+        sale = self.get_objects(pk, request.user)
         if  not sale:
             return Response({
                 'error': {
