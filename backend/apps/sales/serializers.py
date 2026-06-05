@@ -12,7 +12,7 @@ class SaleItemInputSerializer(serializers.Serializer):
 
 class SaleCreateSerializer(serializers.Serializer):
     customer_id = serializers.IntegerField(required=False, allow_null=True)
-    payment_method = serializers.ChoiceField(choices=['cash', 'momo'])
+    payment_method = serializers.ChoiceField(choices=['cash', 'momo', 'card', 'credit'])
     items = SaleItemInputSerializer(many=True, allow_empty=False)
 
     

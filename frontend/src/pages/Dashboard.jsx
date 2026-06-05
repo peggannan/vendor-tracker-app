@@ -2,8 +2,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getDashboard, getSalesHistory } from "../api/api";
+import { useLocation } from "react-router-dom";
 import Header from "../components/Header";
 import Navbar from "../components/Navbar";
+import { ListSkeleton, StatSkeleton } from "../components/Skeleton";
+import EmptyState from "../components/EmptyState";
 
 // Status badge component
 function StatusBadge({ status }) {
@@ -62,23 +65,26 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [fabOpen, setFabOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  
 
   useEffect(() => {
+    setLoading(true);
     Promise.all([getDashboard(), getSalesHistory()])
       .then(([dashRes, salesRes]) => {
         setStats(dashRes.data);
-        setSales(salesRes.data.sales.slice(0, 5));
+        setSales([...salesRes.data.sales].reverse().slice(0, 5));
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
+  }, [location.key]);
 
   const today = new Date().toLocaleDateString("en-GB", {
     day: "numeric", month: "short", year: "numeric"
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-24 max-w-lg mx-auto">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 max-w-lg mx-auto lg:max-w-full">
       <Header />
 
       <div className="px-4 pt-5">
@@ -104,86 +110,73 @@ export default function Dashboard() {
           </button> */}
         </div>
 
-        {/* 4 Stat Cards */}
+        {/* 4 Stat Pills */}
         <div className="grid grid-cols-2 gap-3 mb-4">
+          {loading ? (
+            <><StatSkeleton /><StatSkeleton /><StatSkeleton /><StatSkeleton /></>
+          ) : (
+            <>
+              {/* Today */}
+              <div className="bg-brand-600 rounded-2xl p-4">
+                <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider mb-1">Today</p>
+                <p className="text-xl font-bold text-white">₵{stats?.total_revenue ?? 0}</p>
+                <p className="text-xs text-white/60 mt-0.5">Daily Total</p>
+              </div>
 
-          {/* Today */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Today</p>
-            <p className="text-2xl font-bold text-gray-800 dark:text-white">
-              {loading ? "—" : `₵ ${stats?.total_revenue ?? 0}`}
-            </p>
-            <p className="text-xs text-gray-400 mt-1">Daily Total</p>
-          </div>
+              {/* This Week */}
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">This Week</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">₵{stats?.weekly_revenue ?? 0}</p>
+                <div className="flex items-center gap-1 mt-0.5">
+                  {(stats?.weekly_change ?? 0) >= 0 ? (
+                    <>
+                      <svg width="10" height="10" fill="none" stroke="#16a34a" strokeWidth="2.5"><path d="M5 8V2M2 5l3-3 3 3" /></svg>
+                      <span className="text-xs text-green-500 font-medium">{stats?.weekly_change ?? 0}%</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg width="10" height="10" fill="none" stroke="#dc2626" strokeWidth="2.5"><path d="M5 2v6M2 5l3 3 3-3" /></svg>
+                      <span className="text-xs text-red-500 font-medium">{stats?.weekly_change ?? 0}%</span>
+                    </>
+                  )}
+                </div>
+              </div>
 
-          {/* This Week */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">This Week</p>
-            <p className="text-2xl font-bold text-gray-800 dark:text-white">
-              {loading ? "—" : `₵ ${stats?.weekly_revenue ?? 0}`}
-            </p>
-            {!loading && (
-              <div className="flex items-center gap-1 mt-1">
-                {(stats?.weekly_change ?? 0) >= 0 ? (
+              {/* Low Stock */}
+              <div className={`rounded-2xl p-4 shadow-sm border ${
+                stats?.low_stock?.length > 0
+                  ? "bg-red-50 dark:bg-red-950 border-red-100 dark:border-red-900"
+                  : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700"
+              }`}>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Low Stock</p>
+                {stats?.low_stock?.length > 0 ? (
                   <>
-                    <svg width="12" height="12" fill="none" stroke="#16a34a" strokeWidth="2.5">
-                      <path d="M6 9V2M2 6l4-4 4 4" />
-                    </svg>
-                    <span className="text-xs text-green-500 font-medium">
-                      {stats?.weekly_change ?? 0}% increase
-                    </span>
+                    <p className="text-sm font-bold text-gray-800 dark:text-gray-100 leading-tight">
+                      {stats.low_stock[0].name}
+                    </p>
+                    <p className="text-xs text-red-500 font-medium mt-0.5">
+                      ⚠ {stats.low_stock[0].stock} left
+                    </p>
                   </>
                 ) : (
                   <>
-                    <svg width="12" height="12" fill="none" stroke="#dc2626" strokeWidth="2.5">
-                      <path d="M6 2v7M2 6l4 4 4-4" />
-                    </svg>
-                    <span className="text-xs text-red-500 font-medium">
-                      {stats?.weekly_change ?? 0}% decrease
-                    </span>
+                    <p className="text-xl font-bold text-green-500">✓</p>
+                    <p className="text-xs text-green-500 mt-0.5">All stocked</p>
                   </>
                 )}
               </div>
-            )}
-          </div>
 
-          {/* Low Stock */}
-          <div className={`rounded-2xl p-4 shadow-sm border ${stats?.low_stock?.length > 0 ? "bg-red-50 dark:bg-red-950 border-red-100 dark:border-red-900" : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700"}`}>
-            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Low Stock</p>
-            {loading ? (
-              <p className="text-gray-400 text-sm">—</p>
-            ) : stats?.low_stock?.length > 0 ? (
-              <>
-                <p className="text-base font-bold text-gray-800 dark:text-gray-100 leading-tight">
-                  {stats.low_stock[0].name}
-                </p>
-                <div className="flex items-center gap-1 mt-1">
-                  <svg width="12" height="12" fill="none" stroke="#ef4444" strokeWidth="2">
-                    <path d="M6 2l4.5 8H1.5L6 2z" />
-                    <line x1="6" y1="6" x2="6" y2="7.5" />
-                  </svg>
-                  <span className="text-xs text-red-500 font-medium">
-                    {stats.low_stock[0].stock} items depleted
-                  </span>
-                </div>
-              </>
-            ) : (
-              <p className="text-sm text-green-600 font-medium">All stocked</p>
-            )}
-          </div>
-
-          {/* Total Customers */}
-          <div
-            onClick={() => navigate("/customers")}
-            className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer active:scale-[0.98] transition-transform"
-          >
-            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Total Customers</p>
-            <p className="text-2xl font-bold text-gray-800 dark:text-white">
-              {loading ? "—" : stats?.total_customers ?? 0}
-            </p>
-            <p className="text-xs text-gray-400 mt-1">Unique accounts logged</p>
-          </div>
-
+              {/* Total Customers */}
+              <div
+                onClick={() => navigate("/customers")}
+                className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer active:scale-[0.98] transition-transform"
+              >
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Customers</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">{stats?.total_customers ?? 0}</p>
+                <p className="text-xs text-gray-400 mt-0.5">Unique accounts</p>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Highlight Top Match banner */}
@@ -236,7 +229,7 @@ export default function Dashboard() {
         ) : (
           <div className="flex flex-col gap-3">
 
-            
+            {/* refresh dashboard transactions after a sale is created */}
             {sales.map((sale) => (
               <div
                 key={sale.id}
@@ -254,7 +247,7 @@ export default function Dashboard() {
                       {sale.created_at?.slice(0, 10)}
                     </span>
                   </div>
-                  <span className="text-xs text-gray-400">ID: TX-{sale.id}</span>
+                  <span className="text-xs text-gray-400 font-medium">#{sale.id}</span>
                 </div>
 
                 {/* Middle row — product image + name + amount */}
@@ -275,12 +268,12 @@ export default function Dashboard() {
                       )}
                     </div>
                     <div>
-                     <p className="font-bold text-gray-800 dark:text-white text-sm">
-                      {sale.customer_name ?? sale.product_name}
-                    </p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500">
-                      {sale.product_name} (x{sale.quantity})
-                    </p>
+                      <p className="font-bold text-gray-800 dark:text-white text-sm">
+                        {sale.product_name}
+                      </p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">
+                        {sale.customer_name ? `By: ${sale.customer_name}` : "Walk-in"} · x{sale.quantity}
+                      </p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -309,7 +302,7 @@ export default function Dashboard() {
       </div>
 
       {/* FAB */}
-      <div className="fixed bottom-20 flex flex-col items-end gap-3 z-20" style={{ right: "max(1rem, calc((100vw - 512px) / 2 + 1rem))" }}>
+      <div className="lg:hidden fixed bottom-20 flex flex-col items-end gap-3 z-20" style={{ right: "max(1rem, calc((100vw - 512px) / 2 + 1rem))" }}>
         {fabOpen && (
           <>
             <button
@@ -343,7 +336,7 @@ export default function Dashboard() {
       </div>
 
       {fabOpen && (
-        <div className="fixed inset-0 z-10" onClick={() => setFabOpen(false)} />
+        <div className="lg:hidden fixed inset-0 z-10" onClick={() => setFabOpen(false)} />
       )}
 
       <Navbar />

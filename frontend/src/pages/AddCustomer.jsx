@@ -26,7 +26,7 @@ export default function AddCustomer() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 max-w-lg mx-auto">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 max-w-lg mx-auto lg:max-w-full">
       <PageHeader title="Add Buyer" />
 
       <div className="px-4 pt-4 flex flex-col gap-3">

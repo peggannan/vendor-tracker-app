@@ -33,18 +33,27 @@ export default function ProductDetail() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const { data } = await editProduct(id, form);
-      setProduct(data.product);
-      setEditing(false);
-    } catch {
-      alert("Could not save changes");
-    } finally {
-      setSaving(false);
-    }
-  };
+const handleSave = async () => {
+  setSaving(true);
+  try {
+    const { data } = await editProduct(id, form);
+    // merge the returned product with current form so UI reflects changes
+    const updated = {
+      ...form,
+      ...data.product,
+      price: data.product.price ?? form.price,
+      stock: data.product.stock ?? form.stock,
+      base_cost: data.product.base_cost ?? form.base_cost,
+    };
+    setProduct(updated);
+    setForm(updated);
+    setEditing(false);
+  } catch (err) {
+    alert(err.response?.data?.error?.message || "Could not save changes");
+  } finally {
+    setSaving(false);
+  }
+};
 
   const handleDelete = async () => {
     if (!confirm("Delete this product?")) return;
@@ -69,7 +78,7 @@ export default function ProductDetail() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 max-w-lg mx-auto">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 max-w-lg mx-auto lg:max-w-full">
       <PageHeader
         title="Product Details"
         action={
