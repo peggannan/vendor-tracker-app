@@ -169,10 +169,10 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-white from-brand-500 to-brand-700 flex flex-col lg:flex-row">
+    <div className="min-h-screen  flex flex-col lg:flex-row">
 
       {/* ── Left panel: illustration (desktop only) ── */}
-      <div className="hidden lg:flex flex-1 flex-col items-center justify-center px-12 text-white">
+      <div className="hidden lg:flex flex-1 flex-col items-center justify-center bg-gradient-to-b from-brand-500 to-brand-700 px-12 text-white">
         <div className="flex items-center gap-3 mb-10 self-start">
           <img src={logo} alt="logo" className="w-10 h-10 object-contain" />
           <span className="text-xl font-black tracking-tight">Shelfline</span>
@@ -190,7 +190,7 @@ export default function Signup() {
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 lg:bg-white lg:rounded-l-3xl lg:shadow-2xl lg:max-w-md lg:min-h-screen">
 
         {/* Logo — mobile only */}
-        <div className="flex flex-col items-center mb-6 lg:hidden">
+        <div className="flex flex-col items-center mb-6 lg:hidden bg-gradient-to-b from-brand-500 to-brand-700 w-full py-6 rounded-tl-3xl rounded-tr-3xl">
           <img src={logo} alt="logo" className="w-16 h-16 object-contain mb-2" />
           <h1 className="text-xl font-bold text-white">Shelfline</h1>
           <p className="text-white/60 text-sm">Register Using Your Credentials</p>
