@@ -165,81 +165,82 @@ export default function Onboarding() {
   const isLast = slide === slides.length - 1;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-brand-500 to-brand-700 flex flex-col items-center justify-center px-8 max-w-sm mx-auto lg:max-w-lg">
+    <div className="min-h-screen w-full bg-gradient-to-b from-brand-500 to-brand-700 flex flex-col items-center justify-center px-8">
+      <div className="w-full max-w-sm flex flex-col items-center">
 
-      {/* Logo */}
-      <div className="flex items-center gap-2 self-start mb-10">
-        <img src={logos} alt="logo" className="w-9 h-9 object-contain" />
-        <span className="text-lg font-black text-white tracking-tight">Shelfline</span>
-      </div>
+        {/* Logo */}
+        <div className="flex items-center gap-2 self-start mb-10">
+          <img src={logos} alt="logo" className="w-9 h-9 object-contain" />
+          <span className="text-lg font-black text-white tracking-tight">Shelfline</span>
+        </div>
 
-      {/* Illustration */}
-      <div className="w-64 h-64 lg:w-80 lg:h-80 bg-white/10 border border-white/20 rounded-3xl flex items-center justify-center mb-8 backdrop-blur-sm">
-        <img
-          src={slides[slide].image}
-          alt={slides[slide].title}
-          className="w-40 h-40 lg:w-52 lg:h-52 object-contain"
-        />
-      </div>
-
-      {/* Heading + description */}
-      <div className="text-center mb-6">
-        <h2 className="text-2xl lg:text-3xl font-bold text-white mb-3 leading-tight">
-          {slides[slide].title}
-        </h2>
-        <p className="text-sm lg:text-base text-white/70 leading-relaxed">
-          {slides[slide].desc}
-        </p>
-      </div>
-
-      {/* Dots */}
-      <div className="flex gap-1.5 mb-6">
-        {slides.map((_, i) => (
-          <div
-            key={i}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === slide ? "w-6 bg-white" : "w-1.5 bg-white/35"
-            }`}
+        {/* Illustration */}
+        <div className="w-64 h-64 lg:w-80 lg:h-80 bg-white/10 border border-white/20 rounded-3xl flex items-center justify-center mb-8 backdrop-blur-sm">
+          <img
+            src={slides[slide].image}
+            alt={slides[slide].title}
+            className="w-40 h-40 lg:w-52 lg:h-52 object-contain"
           />
-        ))}
-      </div>
-
-      {/* Skip / Next — below dots */}
-      {isLast ? (
-        <div className="w-full flex flex-col gap-3">
-          <button
-            onClick={() => navigate("/signup")}
-            className="w-full py-4 bg-white text-brand-600 font-bold rounded-2xl text-sm hover:bg-gray-50 active:scale-95 transition-all"
-          >
-            Create Account
-          </button>
-          <button
-            onClick={() => navigate("/login")}
-            className="w-full py-4 border-2 border-white/50 text-white font-semibold rounded-2xl text-sm hover:border-white active:scale-95 transition-all"
-          >
-            Sign In
-          </button>
         </div>
-      ) : (
-        <div className="w-full flex items-center justify-between px-1">
-          <button
-            onClick={() => navigate("/login")}
-            className="text-white/60 text-sm font-medium hover:text-white transition-colors py-2"
-          >
-            Skip
-          </button>
-          <button
-            onClick={() => setSlide(slide + 1)}
-            className="text-white text-sm font-bold hover:text-white/80 transition-colors py-2 flex items-center gap-1"
-          >
-            Next
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <path d="M5 8h6M8 5l3 3-3 3" />
-            </svg>
-          </button>
-        </div>
-      )}
 
+        {/* Heading + description */}
+        <div className="text-center mb-6">
+          <h2 className="text-2xl lg:text-3xl font-bold text-white mb-3 leading-tight">
+            {slides[slide].title}
+          </h2>
+          <p className="text-sm lg:text-base text-white/70 leading-relaxed">
+            {slides[slide].desc}
+          </p>
+        </div>
+
+        {/* Dots */}
+        <div className="flex gap-1.5 mb-6">
+          {slides.map((_, i) => (
+            <div
+              key={i}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === slide ? "w-6 bg-white" : "w-1.5 bg-white/35"
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Skip / Next — below dots */}
+        {isLast ? (
+          <div className="w-full flex flex-col gap-3">
+            <button
+              onClick={() => navigate("/signup")}
+              className="w-full py-4 bg-white text-brand-600 font-bold rounded-2xl text-sm hover:bg-gray-50 active:scale-95 transition-all"
+            >
+              Create Account
+            </button>
+            <button
+              onClick={() => navigate("/login")}
+              className="w-full py-4 border-2 border-white/50 text-white font-semibold rounded-2xl text-sm hover:border-white active:scale-95 transition-all"
+            >
+              Sign In
+            </button>
+          </div>
+        ) : (
+          <div className="w-full flex items-center justify-between px-1">
+            <button
+              onClick={() => navigate("/login")}
+              className="text-white/60 text-sm font-medium hover:text-white transition-colors py-2"
+            >
+              Skip
+            </button>
+            <button
+              onClick={() => setSlide(slide + 1)}
+              className="text-white text-sm font-bold hover:text-white/80 transition-colors py-2 flex items-center gap-1"
+            >
+              Next
+              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M5 8h6M8 5l3 3-3 3" />
+              </svg>
+            </button>
+          </div>
+        )}
+        </div>
     </div>
   );
 }
