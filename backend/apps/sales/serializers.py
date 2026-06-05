@@ -47,12 +47,7 @@ class SaleSerializer(serializers.ModelSerializer):
             'items',
             'created_at'
         ]
-        read_only_fields = [
-            'product_name',
-            'unit_price',
-            'cost_price',
-            'sale_total'
-        ]
+        read_only_fields = ['sale_total']
 
     def get_customer_name(self, obj):
         if obj.customer:
