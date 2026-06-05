@@ -73,7 +73,7 @@ export default function Dashboard() {
     Promise.all([getDashboard(), getSalesHistory()])
       .then(([dashRes, salesRes]) => {
         setStats(dashRes.data);
-        setSales(salesRes.data.sales.slice(0, 5));
+        setSales([...salesRes.data.sales].reverse().slice(0, 5));
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -229,7 +229,7 @@ export default function Dashboard() {
         ) : (
           <div className="flex flex-col gap-3">
 
-            
+            {/* refresh dashboard transactions after a sale is created */}
             {sales.map((sale) => (
               <div
                 key={sale.id}
