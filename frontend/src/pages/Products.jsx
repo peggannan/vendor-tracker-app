@@ -5,6 +5,8 @@ import { getProducts, addProduct, editProduct, deleteProduct } from "../api/api"
 import Header from "../components/Header";
 import PageHeader from "../components/PageHeader";
 import Navbar from "../components/Navbar";
+import { ListSkeleton } from "../components/Skeleton";
+import EmptyState from "../components/EmptyState";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisVertical, faPlus, faMagnifyingGlass, faXmark } from "@fortawesome/free-solid-svg-icons";
 
@@ -167,7 +169,7 @@ export default function Products() {
       <Header />
       <PageHeader title="Products & Stock" />
 
-      <div className="px-4 pt-4">
+      <div className="px-4 pt-4 lg:px-8 lg:pt-6">
 
         {/* Stat pills */}
         <div className="grid grid-cols-4 gap-2 mb-4">

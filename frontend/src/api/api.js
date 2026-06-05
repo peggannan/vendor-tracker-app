@@ -397,16 +397,16 @@ export const getSalesHistory = async () => {
   const raw = res.data.data ?? res.data.results ?? [];
 
   // for each sale fetch detail to get items with product names
-  const detailed = await Promise.all(
-    raw.map(async (s) => {
-      try {
-        const detail = await api.get(`/api/v1/sales/${s.id}/`);
-        return { ...s, ...detail.data.data };
-      } catch {
-        return s;
-      }
-    })
-  );
+ const detailed = await Promise.allSettled(
+  raw.map(async (s) => {
+    try {
+      const detail = await api.get(`/api/v1/sales/${s.id}/`);
+      return { ...s, ...detail.data.data };
+    } catch {
+      return s; // fall back to list data if detail fails
+    }
+  })
+).then((results) => results.map((r) => r.status === "fulfilled" ? r.value : r.reason));
 
   const sales = detailed.map((s) => {
     const firstItem = s.items?.[0] ?? s.sale_items?.[0];

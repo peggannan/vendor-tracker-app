@@ -160,7 +160,7 @@ class SaleListCreateView(APIView):
 class SaleDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get_objects(self, pk, user):
+    def get_object(self, pk, user):
         try:
             return Sale.objects.get(
                 pk=pk,
