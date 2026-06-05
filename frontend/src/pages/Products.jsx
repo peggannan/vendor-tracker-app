@@ -35,7 +35,7 @@ function ProductModal({ product, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 max-w-lg mx-auto lg:max-w-full">
+    <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center">
       <div className="bg-white dark:bg-gray-800 rounded-t-3xl w-full max-w-lg p-6">
         <h3 className="font-bold text-lg text-gray-800 dark:text-gray-100 mb-4">
           {product ? "Edit Product" : "Add Item"}

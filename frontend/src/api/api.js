@@ -408,6 +408,8 @@ export const getSalesHistory = async () => {
     })
   );
 
+  // map to get product name and other details in a consistent format for the frontend
+  //get product name from sale 
   const sales = detailed.map((s) => {
     const firstItem = s.items?.[0] ?? s.sale_items?.[0];
     return {
@@ -516,6 +518,8 @@ export const getDashboard = async () => {
       : 0;
 
     // Top product — built from all items across all sales
+    // this is bit complex. get name of product from each sale instead of just using product_name field which may be missing or inaccurate. then using the name in the transaction details, get the quantity sold and sum it up for each product to find the top selling product. this is more accurate and also works for sales with multiple items.
+    
     const productMap = {};
     sales.forEach((s) => {
       if (s.status !== "Approved") return;
@@ -526,6 +530,7 @@ export const getDashboard = async () => {
           if (!productMap[name]) productMap[name] = 0;
           productMap[name] += parseInt(item.quantity || 1);
         });
+        // 
       } else if (s.product_name && s.product_name !== "Unknown") {
         if (!productMap[s.product_name]) productMap[s.product_name] = 0;
         productMap[s.product_name] += parseInt(s.quantity || 1);
