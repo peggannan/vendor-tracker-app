@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getDashboard, getSalesHistory } from "../api/api";
+import { useLocation } from "react-router-dom";
 import Header from "../components/Header";
 import Navbar from "../components/Navbar";
 import { ListSkeleton, StatSkeleton } from "../components/Skeleton";
@@ -64,8 +65,11 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [fabOpen, setFabOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  
 
   useEffect(() => {
+    setLoading(true);
     Promise.all([getDashboard(), getSalesHistory()])
       .then(([dashRes, salesRes]) => {
         setStats(dashRes.data);
@@ -73,7 +77,7 @@ export default function Dashboard() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
+  }, [location.key]);
 
   const today = new Date().toLocaleDateString("en-GB", {
     day: "numeric", month: "short", year: "numeric"
