@@ -190,7 +190,7 @@ export default function Signup() {
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 lg:bg-white lg:rounded-l-3xl lg:shadow-2xl lg:max-w-md lg:min-h-screen">
 
         {/* Logo — mobile only */}
-        <div className="flex flex-col items-center mb-6 lg:hidden bg-gradient-to-b from-brand-500 to-brand-700 w-full py-6 rounded-tl-3xl rounded-tr-3xl">
+        <div className="flex flex-col items-center mb-6 lg:hidden bg-gradient-to-b from-brand-500 to-brand-700 w-full">
           <img src={logo} alt="logo" className="w-16 h-16 object-contain mb-2" />
           <h1 className="text-xl font-bold text-white">Shelfline</h1>
           <p className="text-white/60 text-sm">Register Using Your Credentials</p>
