@@ -9,6 +9,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import SignupSerializer, LoginSerializer, ChangePasswordSerializer, ProfileSerializer
 
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.conf import settings
+from django.core.mail import send_mail
+from .serializers import ForgotPasswordSerializer, ResetPasswordSerializer
+
 # Create your views here.
 
 User = get_user_model()
@@ -191,4 +198,112 @@ class ProfileView(APIView):
                 'message': serializer.errors
             }
         }, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class ForgotPasswordView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = ForgotPasswordSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({
+                'error': {
+                    'code': 'VALIDATION_ERROR',
+                    'message': serializer.errors
+                }
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        email = serializer.validated_data['email']
+
+        # always return success even if email not found
+        # this prevents email enumeration attacks
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({
+                'data': {
+                    'message': 'If an account with that email exists you will receive a reset link'
+                }
+            }, status=status.HTTP_200_OK)
+
+        # generate token
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+        # build reset link
+        frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+        reset_link = f'{frontend_url}/reset-password?uid={uid}&token={token}'
+
+        # send email
+        send_mail(
+            subject='VendorTracker — Password Reset',
+            message=f'Click the link below to reset your password:\n\n{reset_link}\n\nThis link expires in 24 hours.\n\nIf you did not request this, ignore this email.',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            fail_silently=False,
+        )
+
+        return Response({
+            'data': {
+                'message': 'If an account with that email exists you will receive a reset link'
+            }
+        }, status=status.HTTP_200_OK)
+
+
+class ResetPasswordView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = ResetPasswordSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({
+                'error': {
+                    'code': 'VALIDATION_ERROR',
+                    'message': serializer.errors
+                }
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        token = serializer.validated_data['token']
+        new_password = serializer.validated_data['new_password']
+
+        # get uid from request
+        uid = request.data.get('uid')
+        if not uid:
+            return Response({
+                'error': {
+                    'code': 'VALIDATION_ERROR',
+                    'message': 'UID is required'
+                }
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # decode uid and get user
+        try:
+            user_pk = force_str(urlsafe_base64_decode(uid))
+            user = User.objects.get(pk=user_pk)
+        except (User.DoesNotExist, ValueError, TypeError):
+            return Response({
+                'error': {
+                    'code': 'VALIDATION_ERROR',
+                    'message': 'Invalid reset link'
+                }
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # verify token
+        if not default_token_generator.check_token(user, token):
+            return Response({
+                'error': {
+                    'code': 'VALIDATION_ERROR',
+                    'message': 'Reset link is invalid or has expired'
+                }
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # set new password
+        user.set_password(new_password)
+        user.save()
+
+        return Response({
+            'data': {
+                'message': 'Password reset successfully'
+            }
+        }, status=status.HTTP_200_OK)
 
