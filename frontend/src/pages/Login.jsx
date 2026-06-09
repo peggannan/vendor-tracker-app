@@ -214,7 +214,9 @@ export default function Login() {
               </label>
               <button
               onClick={() => navigate("/forgot-password")}
-               type="button" className="text-brand-600 font-medium">Forgot Password</button>
+              type="button" className="text-brand-600 font-medium">
+              Forgot Password
+              </button>
             </div>
 
             <button
