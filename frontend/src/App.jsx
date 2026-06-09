@@ -32,6 +32,8 @@ export default function App() {
           <Route path="/" element={<Onboarding />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Protected routes — must be logged in */}
           <Route element={<ProtectedRoute />}>
@@ -49,8 +51,6 @@ export default function App() {
               <Route path="/settings" element={<Settings />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/user-profile" element={<UserProfile />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
             </Route>
           </Route>
 
