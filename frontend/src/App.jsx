@@ -19,6 +19,8 @@ import CustomerDetail from "./pages/CustomerDetail";
 import AddCustomer from "./pages/AddCustomer";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 
 export default function App() {
@@ -30,6 +32,8 @@ export default function App() {
           <Route path="/" element={<Onboarding />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Protected routes — must be logged in */}
           <Route element={<ProtectedRoute />}>

@@ -212,7 +212,11 @@ export default function Login() {
               <label className="flex items-center gap-2 text-gray-500">
                 <input type="checkbox" className="accent-brand-600" /> Remember Me
               </label>
-              <button type="button" className="text-brand-600 font-medium">Forgot Password</button>
+              <button
+              onClick={() => navigate("/forgot-password")}
+              type="button" className="text-brand-600 font-medium">
+              Forgot Password
+              </button>
             </div>
 
             <button
