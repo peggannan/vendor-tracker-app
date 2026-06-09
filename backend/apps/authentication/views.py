@@ -307,4 +307,19 @@ class ResetPasswordView(APIView):
                 'message': 'Password reset successfully'
             }
         }, status=status.HTTP_200_OK)
+    
+
+class TestEmailView(APIView):
+    def post(self, request):
+        try:
+            send_mail(
+                subject='Test Email to Buyer',
+                message='Hello! This is a test email to confirm our mail server connection works.',
+                from_email=None,  # This tells Django to use DEFAULT_FROM_EMAIL automatically
+                recipient_list=['aggreybernard3@gmail.com'], 
+                fail_silently=False,
+            )
+            return Response({"message": "Email sent successfully!"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
