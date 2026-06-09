@@ -414,7 +414,7 @@ export const getSalesHistory = async () => {
       id: s.id,
       customer_name: s.customer_name ?? null,
       customer_id: s.customer_id ?? null,
-      product_name: firstItem?.product_name ?? s.product_name ?? `Sale #${s.id}`,
+      product_name: firstItem?.product_name ?? "Unknown Product",
       quantity: firstItem?.quantity ?? 1,
       total: parseFloat(s.sale_total ?? s.total ?? 0),
       payment_method: s.payment_method === "momo"
@@ -555,4 +555,22 @@ export const getDashboard = async () => {
       }
     };
   }
+};
+
+// Forgot Password:
+export const forgotPassword = async (email) => {
+  if (USE_MOCK) { await delay(); return { data: { message: "Email sent" } }; }
+  const res = await api.post("/api/v1/auth/forgot-password/", { email });
+  return { data: res.data.data };
+};
+
+export const resetPassword = async (uid, token, new_password, new_password_confirm) => {
+  if (USE_MOCK) { await delay(); return { data: { message: "Password reset" } }; }
+  const res = await api.post("/api/v1/auth/reset-password/", {
+    uid,
+    token,
+    new_password,
+    new_password_confirm,
+  });
+  return { data: res.data.data };
 };

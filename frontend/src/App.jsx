@@ -19,6 +19,8 @@ import CustomerDetail from "./pages/CustomerDetail";
 import AddCustomer from "./pages/AddCustomer";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 
 export default function App() {
