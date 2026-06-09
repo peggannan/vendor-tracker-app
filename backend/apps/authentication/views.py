@@ -310,6 +310,8 @@ class ResetPasswordView(APIView):
     
 
 class TestEmailView(APIView):
+    permission_classes = [AllowAny]
+    
     def post(self, request):
         try:
             send_mail(
