@@ -247,7 +247,7 @@ export default function Dashboard() {
                       {sale.created_at?.slice(0, 10)}
                     </span>
                   </div>
-                  <span className="text-xs text-gray-400 font-medium">#{product_name}</span>
+                  <span className="text-xs text-gray-400 font-medium">#{sale.id}</span>
                 </div>
 
                 {/* Middle row — product image + name + amount */}
