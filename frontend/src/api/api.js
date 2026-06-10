@@ -403,8 +403,8 @@ export const getSalesHistory = async () => {
       id: s.id,
       customer_name: s.customer_name ?? null,
       customer_id: s.customer_id ?? null,
-      product_name: firstItem?.product_name ?? `product ${s.name}`,
-      // product_name: firstItem?.product_name ?? s.product_name ?? `Sale #${s.id}`,
+      // product_name: firstItem?.product_name ?? `product ${s.name}`,
+      product_name: firstItem?.product_name ?? s.product_name ?? `Product #${s.id}`,
       quantity: firstItem?.quantity ?? 1,
       total: parseFloat(s.sale_total ?? 0),
       payment_method: s.payment_method === "momo"
