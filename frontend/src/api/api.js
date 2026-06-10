@@ -416,7 +416,8 @@ const detailed = await Promise.allSettled(
       id: s.id,
       customer_name: s.customer_name ?? null,
       customer_id: s.customer_id ?? null,
-      product_name: firstItem?.product_name ?? s.product_name ?? `Sale #${s.id}`,
+      product_name: firstItem?.product_name ?? "Unknown Product",
+      // product_name: firstItem?.product_name ?? s.product_name ?? `Sale #${s.id}`,
       quantity: firstItem?.quantity ?? 1,
       total: parseFloat(s.sale_total ?? s.total ?? 0),
       payment_method: s.payment_method === "momo"
