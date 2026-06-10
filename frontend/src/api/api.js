@@ -391,35 +391,19 @@ export const recordSale = async (data) => {
 
 export const getSalesHistory = async () => {
   if (USE_MOCK) { await delay(); return { data: { sales: mockSales } }; }
-  
-  // fetch list + individual details to get product names
+
   const res = await api.get("/api/v1/sales/");
   const raw = res.data.data ?? res.data.results ?? [];
 
-  // for each sale fetch detail to get items with product names
-const detailed = await Promise.allSettled(
-  raw.map(async (s) => {
-    try {
-      const detail = await api.get(`/api/v1/sales/${s.id}/`);
-      return { ...s, ...detail.data.data };
-    } catch {
-      return s;
-    }
-  })
-).then((results) =>
-  results.map((r) => r.status === "fulfilled" ? r.value : r.reason)
-);
-
-  const sales = detailed.map((s) => {
-    const firstItem = s.items?.[0] ?? s.sale_items?.[0];
+  const sales = raw.map((s) => {
+    const firstItem = s.items?.[0];   // SaleListSerializer already includes items with product_name
     return {
       id: s.id,
       customer_name: s.customer_name ?? null,
       customer_id: s.customer_id ?? null,
       product_name: firstItem?.product_name ?? "Unknown Product",
-      // product_name: firstItem?.product_name ?? s.product_name ?? `Sale #${s.id}`,
       quantity: firstItem?.quantity ?? 1,
-      total: parseFloat(s.sale_total ?? s.total ?? 0),
+      total: parseFloat(s.sale_total ?? 0),
       payment_method: s.payment_method === "momo"
         ? "MOBILE MONEY"
         : s.payment_method?.toUpperCase() ?? "CASH",
@@ -431,7 +415,7 @@ const detailed = await Promise.allSettled(
         : "Pending",
       created_at: s.created_at,
       product_image: null,
-      items: s.items ?? s.sale_items ?? [],
+      items: s.items ?? [],
     };
   });
 
