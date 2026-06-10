@@ -57,6 +57,7 @@ class SaleSerializer(serializers.ModelSerializer):
 
 class SaleListSerializer(serializers.ModelSerializer):
     customer_name = serializers.SerializerMethodField()
+    items = SaleItemSerializer(many=True, read_only=True, source='sale_items')
 
     class Meta:
         model = Sale
@@ -68,12 +69,13 @@ class SaleListSerializer(serializers.ModelSerializer):
             'sale_total',
             'status',
             'created_at',
+            'items',
         ]
 
     def get_customer_name(self, obj):
-            if obj.customer:
-                return obj.customer.name
-            return None
+        if obj.customer:
+            return obj.customer.name
+        return None
 
 
 

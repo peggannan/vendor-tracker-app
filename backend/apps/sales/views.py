@@ -105,6 +105,7 @@ class SaleListCreateView(APIView):
                         'message': f'Product with id {item["product_id"]} cannot be found'
                     }
                 }, status=status.HTTP_404_NOT_FOUND)
+
             if item['quantity'] > product.stock_quantity:
                 return Response({
                     'error': {
@@ -112,55 +113,56 @@ class SaleListCreateView(APIView):
                         'message': f'Not enough stock for {product.name}. Available: {product.stock_quantity}'
                     }
                 }, status=status.HTTP_400_BAD_REQUEST)
+
             products.append((product, item['quantity']))
 
-            #if all checks passed now lets writte to the db
-            try:
-                with transaction.atomic():
-                    sale_total = sum(
-                        product.selling_price * quantity
-                        for product, quantity in products
-                    )
-                    
-                    sale = Sale.objects.create(
-                        user=request.user,
-                        customer=customer,
-                        payment_method=payment_method,
-                        sale_total=sale_total,
-                        status='completed'
-                    )
+        # NOW write to db — outside the for loop
+        try:
+            with transaction.atomic():
+                sale_total = sum(
+                    product.selling_price * quantity
+                    for product, quantity in products
+                )
 
-                    for product, quantity in products:
-                        SaleItem.objects.create(
-                            sale=sale,
-                            product=product,
-                            product_name=product.name,
-                            unit_price=product.selling_price,
-                            cost_price=product.cost_price,
-                            quantity=quantity,
-                            total=product.selling_price * quantity
+                sale = Sale.objects.create(
+                    user=request.user,
+                    customer=customer,
+                    payment_method=payment_method,
+                    sale_total=sale_total,
+                    status='completed'
+                )
 
-                        )
-                        #deducting stock 
-                        product.stock_quantity -= quantity
-                        product.save()
-            except Exception as e:
-                return Response({
-                    'error': {
-                        'code': 'SERVER_ERROR',
-                        'message': 'Something went wrong while recording the sale'
-                    }
-                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            sale_serializer = SaleSerializer(sale)
+                for product, quantity in products:
+                    SaleItem.objects.create(
+                        sale=sale,
+                        product=product,
+                        product_name=product.name,
+                        unit_price=product.selling_price,
+                        cost_price=product.cost_price,
+                        quantity=quantity,
+                        total=product.selling_price * quantity
+                    )
+                    product.stock_quantity -= quantity
+                    product.save()
+
+        except Exception as e:
             return Response({
-                'data': sale_serializer.data
-            }, status=status.HTTP_201_CREATED)
+                'error': {
+                    'code': 'SERVER_ERROR',
+                    'message': 'Something went wrong while recording the sale'
+                }
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        sale_serializer = SaleSerializer(sale)
+        return Response({
+            'data': sale_serializer.data
+        }, status=status.HTTP_201_CREATED)
         
 
 class SaleDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get_objects(self, pk, user):
+    def get_object(self, pk, user):
         try:
             return Sale.objects.get(
                 pk=pk,
@@ -170,7 +172,7 @@ class SaleDetailView(APIView):
             return None
         
     def get(self, request, pk):
-        sale = self.get_objects(pk, request.user)
+        sale = self.get_object(pk, request.user)
         if  not sale:
             return Response({
                 'error': {
