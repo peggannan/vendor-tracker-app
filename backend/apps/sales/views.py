@@ -128,6 +128,7 @@ class SaleListCreateView(APIView):
 
                 sale = Sale.objects.create(
                     user=request.user,
+                    product_name=product.name,
                     customer=customer,
                     payment_method=payment_method,
                     sale_total=sale_total,
