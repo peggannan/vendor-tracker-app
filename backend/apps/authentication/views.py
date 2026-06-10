@@ -216,17 +216,17 @@ class ForgotPasswordView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
         email = serializer.validated_data['email']
-
         # always return success even if email not found
         # this prevents email enumeration attacks
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return Response({
+            return Response(
+                {
                 'data': {
                     'message': 'If an account with that email exists you will receive a reset link'
                 }
-            }, status=status.HTTP_200_OK)
+            }, status=status.HTTP_404_NOT_FOUND)
 
         # generate token
         token = default_token_generator.make_token(user)
@@ -235,7 +235,6 @@ class ForgotPasswordView(APIView):
         # build reset link
         frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
         reset_link = f'{frontend_url}/reset-password?uid={uid}&token={token}'
-
         # send email
         emailjs_data = {
             'service_id': os.getenv('EMAILJS_SERVICE_ID'),
@@ -243,7 +242,7 @@ class ForgotPasswordView(APIView):
             'user_id': os.getenv('EMAILJS_PUBLIC_KEY'),
             'accessToken': os.getenv('EMAILJS_PRIVATE_KEY'),
             'template_params': {
-                'to_email': user.email,
+                'to_email': email,
                 'reset_link': reset_link,
             },
         }
