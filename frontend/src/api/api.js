@@ -395,6 +395,8 @@ export const getSalesHistory = async () => {
   const res = await api.get("/api/v1/sales/");
   const raw = res.data.data ?? res.data.results ?? [];
 
+  console.log("First sale raw:", JSON.stringify(raw[0], null, 2));
+
   const sales = raw.map((s) => {
     const firstItem = s.items?.[0];   // SaleListSerializer already includes items with product_name
     return {
