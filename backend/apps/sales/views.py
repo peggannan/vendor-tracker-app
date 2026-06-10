@@ -25,7 +25,9 @@ class SaleListCreateView(APIView):
     def get(self, request):
         sales = Sale.objects.filter(
             user=request.user
-        ).order_by('created_at')
+        ).prefetch_related('sale_items').order_by('created_at')
+
+        
 
         #filtering the date
         date = request.query_params.get('date')
