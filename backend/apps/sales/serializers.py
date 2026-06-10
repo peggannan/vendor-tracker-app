@@ -32,14 +32,13 @@ class SaleItemSerializer(serializers.ModelSerializer):
 
 
 class SaleSerializer(serializers.ModelSerializer):
-    items = SaleItemSerializer(many=True, read_only=True)
+    items = SaleItemSerializer(many=True, read_only=True, source='sale_items')
     customer_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Sale
         fields = [
             'id',
-            'product_name'
             'customer_id',
             'customer_name',
             'payment_method',
@@ -56,27 +55,27 @@ class SaleSerializer(serializers.ModelSerializer):
         return None
     
 
-# class SaleListSerializer(serializers.ModelSerializer):
-#     customer_name = serializers.SerializerMethodField()
-#     items = SaleItemSerializer(many=True, read_only=True, source='sale_items')
+class SaleListSerializer(serializers.ModelSerializer):
+    customer_name = serializers.SerializerMethodField()
+    items = SaleItemSerializer(many=True, read_only=True, source='sale_items')
 
-#     class Meta:
-#         model = Sale
-#         fields = [
-#             'id',
-#             'customer_id',
-#             'customer_name',
-#             'payment_method',
-#             'sale_total',
-#             'status',
-#             'created_at',
-#             'items',
-#         ]
+    class Meta:
+        model = Sale
+        fields = [
+            'id',
+            'customer_id',
+            'customer_name',
+            'payment_method',
+            'sale_total',
+            'status',
+            'created_at',
+            'items',
+        ]
 
-#     def get_customer_name(self, obj):
-#         if obj.customer:
-#             return obj.customer.name
-#         return None
+    def get_customer_name(self, obj):
+        if obj.customer:
+            return obj.customer.name
+        return None
 
 
 
