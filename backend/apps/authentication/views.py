@@ -1,3 +1,4 @@
+import requests
 from django.shortcuts import render
 import os
 from django.contrib.auth import get_user_model
@@ -236,13 +237,36 @@ class ForgotPasswordView(APIView):
         reset_link = f'{frontend_url}/reset-password?uid={uid}&token={token}'
 
         # send email
-        send_mail(
-            subject='VendorTracker — Password Reset',
-            message=f'Click the link below to reset your password:\n\n{reset_link}\n\nThis link expires in 24 hours.\n\nIf you did not request this, ignore this email.',
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[email],
-            fail_silently=False,
+        emailjs_data = {
+            'service_id': os.getenv('EMAILJS_SERVICE_ID'),
+            'template_id': os.getenv('EMAILJS_TEMPLATE_ID'),
+            'user_id': os.getenv('EMAILJS_PUBLIC_KEY'),
+            'accessToken': os.getenv('EMAILJS_PRIVATE_KEY'),
+            'template_params': {
+                'to_email': email,
+                'reset_link': reset_link,
+            },
+        }
+
+        response = requests.post(
+            'https://api.emailjs.com/api/v1.0/email/send',
+            json=emailjs_data,
+            headers={'Content-Type': 'application/json'},
         )
+        if response.status_code != 200:
+            # Helps you trace errors directly in your Render terminal logs
+            print(f'EmailJS failure reason: {response.text}')
+
+            return Response(
+                {
+                    'error': {
+                        'code': 'SERVER_ERROR',
+                        'message': 'Failed to send email',
+                    }
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
 
         return Response({
             'data': {
