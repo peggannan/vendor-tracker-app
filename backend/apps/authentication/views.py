@@ -243,7 +243,7 @@ class ForgotPasswordView(APIView):
             'user_id': os.getenv('EMAILJS_PUBLIC_KEY'),
             'accessToken': os.getenv('EMAILJS_PRIVATE_KEY'),
             'template_params': {
-                'to_email': email,
+                'to_email': user.email,
                 'reset_link': reset_link,
             },
         }
