@@ -19,6 +19,8 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
   const [saving, setSaving] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -28,15 +30,28 @@ export default function ProductDetail() {
         const found = data.products.find((p) => p.id == id);
         setProduct(found);
         setForm(found ?? {});
+        setImageFile(null);
+        setImagePreview(found?.image ?? "");
       })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [id]);
 
+  useEffect(() => {
+    if (!imageFile) {
+      setImagePreview(form.image ?? product?.image ?? "");
+      return undefined;
+    }
+
+    const previewUrl = URL.createObjectURL(imageFile);
+    setImagePreview(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [imageFile, form.image, product?.image]);
+
 const handleSave = async () => {
   setSaving(true);
   try {
-    const { data } = await editProduct(id, form);
+    const { data } = await editProduct(id, { ...form, image_file: imageFile });
     // merge the returned product with current form so UI reflects changes
     const updated = {
       ...form,
@@ -47,6 +62,8 @@ const handleSave = async () => {
     };
     setProduct(updated);
     setForm(updated);
+    setImageFile(null);
+    setImagePreview(updated.image ?? "");
     setEditing(false);
   } catch (err) {
     alert(err.response?.data?.error?.message || "Could not save changes");
@@ -119,9 +136,9 @@ const handleSave = async () => {
 
           {/* Product image */}
           <div className="relative bg-gray-100 dark:bg-gray-700 h-48 flex items-center justify-center border border-gray-200 dark:border-gray-600">
-            {form.image ? (
+            {imagePreview ? (
               <img
-                src={form.image}
+                src={imagePreview}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
@@ -131,12 +148,21 @@ const handleSave = async () => {
                 <p className="text-sm">Image</p>
               </div>
             )}
-            {editing && (
-              <button className="absolute bottom-3 right-3 bg-brand-600 text-white text-xs px-3 py-1.5 rounded-full font-semibold">
-                Change Image
-              </button>
-            )}
           </div>
+
+          {editing && (
+            <div className="px-5 py-3 border-b border-gray-50 dark:border-gray-700">
+              <label className="text-sm text-gray-700 dark:text-gray-300 font-medium block mb-1">
+                Product Image
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+                className="w-full bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+              />
+            </div>
+          // </div>
 
           {/* Product name + SKU */}
           <div className="px-5 py-4 border-b border-gray-50 dark:border-gray-700 text-center">
@@ -176,15 +202,17 @@ const handleSave = async () => {
               <label className="text-sm text-gray-700 dark:text-gray-300 font-medium block mb-1">
                 Category
               </label>
-              <select
+              <input
+                list="product-detail-categories"
                 value={form.category ?? ""}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
                 disabled={!editing}
-                className="w-full bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none disabled:opacity-70 focus:ring-2 focus:ring-brand-500 appearance-none"
-              >
-                <option value="">Select category</option>
-                {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
-              </select>
+                placeholder="Enter or choose a category"
+                className="w-full bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none disabled:opacity-70 focus:ring-2 focus:ring-brand-500"
+              />
+              <datalist id="product-detail-categories">
+                {CATEGORIES.map((c) => <option key={c} value={c} />)}
+              </datalist>
             </div>
 
             {/* Unit */}
@@ -294,7 +322,7 @@ const handleSave = async () => {
         {editing && (
           <div className="flex gap-3 mb-4">
             <button
-              onClick={() => { setEditing(false); setForm(product); }}
+              onClick={() => { setEditing(false); setForm(product); setImageFile(null); setImagePreview(product?.image ?? ""); }}
               className="flex-1 py-3.5 border border-gray-200 dark:border-gray-600 rounded-2xl text-gray-600 dark:text-gray-300 font-semibold"
             >
               Cancel

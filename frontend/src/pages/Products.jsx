@@ -17,17 +17,31 @@ function ProductModal({ product, onClose, onSave }) {
   const [form, setForm] = useState(
     product || { name: "", price: "", stock: "", category: "Groceries", base_cost: "", unit: "piece", expiry_date: "" }
   );
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(product?.image ?? "");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!imageFile) {
+      setImagePreview(product?.image ?? "");
+      return undefined;
+    }
+
+    const previewUrl = URL.createObjectURL(imageFile);
+    setImagePreview(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [imageFile, product?.image]);
 
   const handleSubmit = async () => {
     if (!form.name || !form.price) return alert("Name and price are required");
     setLoading(true);
     try {
+      const payload = { ...form, image_file: imageFile };
       if (product) {
-        const { data } = await editProduct(product.id, form);
+        const { data } = await editProduct(product.id, payload);
         onSave(data.product, "edit");
       } else {
-        const { data } = await addProduct(form);
+        const { data } = await addProduct(payload);
         onSave(data.product, "add");
       }
       onClose();
@@ -50,7 +64,6 @@ function ProductModal({ product, onClose, onSave }) {
             { label: "Unit Sale Price (₵) *", key: "price", type: "number" },
             { label: "Unit Base Cost (₵)", key: "base_cost", type: "number" },
             { label: "Stock Quantity", key: "stock", type: "number" },
-            { label: "Image URL (optional)", key: "image", type: "text", placeholder: "https://..." },
             { label: "Expiry Date (optional)", key: "expiry_date", type: "date" },
           ].map(({ label, key, type, placeholder }) => (
             <div key={key}>
@@ -66,15 +79,18 @@ function ProductModal({ product, onClose, onSave }) {
           ))}
           <div>
             <label className="text-xs text-gray-400 mb-1 block">Category</label>
-            <select
+            <input
+              list="product-category-options"
               value={form.category ?? "Groceries"}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
+              placeholder="Enter or choose a category"
               className="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500"
-            >
+            />
+            <datalist id="product-category-options">
               {CATEGORIES.filter((c) => c !== "All").map((c) => (
-                <option key={c}>{c}</option>
+                <option key={c} value={c} />
               ))}
-            </select>
+            </datalist>
           </div>
           <div>
             <label className="text-xs text-gray-400 mb-1 block">Unit</label>
@@ -87,6 +103,20 @@ function ProductModal({ product, onClose, onSave }) {
                 <option key={u} value={u}>{u.charAt(0).toUpperCase() + u.slice(1)}</option>
               ))}
             </select>
+          </div>
+          <div>
+            <label className="text-xs text-gray-400 mb-1 block">Product Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+              className="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500"
+            />
+            {imagePreview && (
+              <div className="mt-2 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 h-28">
+                <img src={imagePreview} alt={form.name || "Product preview"} className="w-full h-full object-cover" />
+              </div>
+            )}
           </div>
         </div>
         <div className="flex gap-3 mt-4">

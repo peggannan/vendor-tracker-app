@@ -252,6 +252,8 @@ export const getProducts = async () => {
   const products = raw.map((p) => ({
     id: p.id,
     name: p.name,
+    description: p.description,
+    image: p.image,
     price: p.selling_price,       // map selling_price → price
     base_cost: p.cost_price,      // map cost_price → base_cost
     stock: p.stock_quantity,      // map stock_quantity → stock
@@ -268,6 +270,38 @@ export const getProducts = async () => {
   return { data: { products } };
 };
 
+const buildProductFormData = (data) => {
+  const formData = new FormData();
+  formData.append("name", data.name ?? "");
+  formData.append("selling_price", data.price ?? "");
+  formData.append("cost_price", data.base_cost || data.price || "");
+  formData.append("stock_quantity", data.stock || 0);
+  formData.append("category", data.category || "General");
+  formData.append("unit", data.unit || "piece");
+
+  if (data.unit_custom) {
+    formData.append("unit_custom", data.unit_custom);
+  }
+
+  if (data.description) {
+    formData.append("description", data.description);
+  }
+
+  if (data.expiry_date) {
+    formData.append("expiry_date", data.expiry_date);
+  }
+
+  if (data.low_stock_threshold !== undefined && data.low_stock_threshold !== null) {
+    formData.append("low_stock_threshold", data.low_stock_threshold);
+  }
+
+  if (data.image_file instanceof File) {
+    formData.append("image", data.image_file);
+  }
+
+  return formData;
+};
+
 export const addProduct = async (data) => {
   if (USE_MOCK) {
     await delay();
@@ -275,22 +309,15 @@ export const addProduct = async (data) => {
     mockProducts.push(p);
     return { data: { product: p } };
   }
-  const res = await api.post("/api/v1/products/", {
-    name: data.name,
-    selling_price: data.price,
-    cost_price: data.base_cost || data.price,
-    stock_quantity: data.stock || 0,
-    category: data.category || "General",
-    unit: data.unit || "piece",
-    expiry_date: data.expiry_date || null,
-    low_stock_threshold: data.low_stock_threshold || 5,
-  });
+  const res = await api.post("/api/v1/products/", buildProductFormData(data));
   const p = res.data.data;
   return {
     data: {
       product: {
         id: p.id,
         name: p.name,
+        description: p.description,
+        image: p.image,
         price: p.selling_price,
         base_cost: p.cost_price,
         stock: p.stock_quantity,
@@ -305,21 +332,17 @@ export const addProduct = async (data) => {
 
 export const editProduct = async (id, data) => {
   if (USE_MOCK) { await delay(); return { data: { product: { id, ...data } } }; }
-  const res = await api.patch(`/api/v1/products/${id}/`, {
-    name: data.name,
-    selling_price: data.price,
-    cost_price: data.base_cost,
-    category: data.category,
-    unit: data.unit,
-    expiry_date: data.expiry_date || null,
-    low_stock_threshold: data.low_stock_threshold || 5,
-  });
+  const payload = buildProductFormData(data);
+  payload.delete("stock_quantity");
+  const res = await api.patch(`/api/v1/products/${id}/`, payload);
   const p = res.data.data;
   return {
     data: {
       product: {
         id: p.id,
         name: p.name,
+        description: p.description,
+        image: p.image,
         price: p.selling_price,
         base_cost: p.cost_price,
         stock: p.stock_quantity,
@@ -392,17 +415,26 @@ export const recordSale = async (data) => {
 export const getSalesHistory = async () => {
   if (USE_MOCK) { await delay(); return { data: { sales: mockSales } }; }
 
-  const res = await api.get("/api/v1/sales/");
-  const raw = res.data.data ?? res.data.results ?? [];
+  const [salesRes, productsRes] = await Promise.all([
+    api.get("/api/v1/sales/"),
+    getProducts().catch(() => ({ data: { products: [] } })),
+  ]);
+
+  const raw = salesRes.data.data ?? salesRes.data.results ?? [];
+  const currentProducts = new Map((productsRes.data.products ?? []).map((product) => [String(product.id), product]));
 
   const sales = raw.map((s) => {
     const firstItem = s.items?.[0];   // SaleListSerializer already includes items with product_name
+    const currentProductId = firstItem?.product_id ?? s.product_id ?? null;
+    const currentProduct = currentProducts.get(String(currentProductId));
     return {
       id: s.id,
       customer_name: s.customer_name ?? null,
       customer_id: s.customer_id ?? null,
       // product_name: firstItem?.product_name ?? "Unknown Product",
-      product_name: firstItem?.product_name ?? s.product_name ?? `Sale #${s.id}`,
+      product_name: currentProduct?.name ?? firstItem?.product_name ?? s.product_name ?? `Sale #${s.id}`,
+      product_id: currentProductId ?? null,
+      product_image: currentProduct?.image ?? null,
       quantity: firstItem?.quantity ?? 1,
       total: parseFloat(s.sale_total ?? 0),
       payment_method: s.payment_method === "momo"
@@ -415,7 +447,6 @@ export const getSalesHistory = async () => {
         ? "Rejected"
         : "Pending",
       created_at: s.created_at,
-      product_image: null,
       items: s.items ?? [],
     };
   });
