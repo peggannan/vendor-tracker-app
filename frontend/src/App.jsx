@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { NotificationProvider } from "./context/NotificationContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AppLayout from "./components/AppLayout";
 
@@ -26,37 +27,39 @@ import ResetPassword from "./pages/ResetPassword";
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Onboarding />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
+      <NotificationProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Onboarding />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
-          {/* Protected routes — must be logged in */}
-          <Route element={<ProtectedRoute />}>
-            <Route element={<AppLayout><Outlet /></AppLayout>}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/products/:id" element={<ProductDetail />} />
-              <Route path="/record-sale" element={<RecordSale />} />
-              <Route path="/transactions" element={<Transactions />} />
-              <Route path="/transactions/:id" element={<TransactionDetail />} />
-              <Route path="/customers" element={<Customers />} />
-              <Route path="/customers/new" element={<AddCustomer />} />
-              <Route path="/customers/:id" element={<CustomerDetail />} />
-              <Route path="/reports" element={<Reports />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/notifications" element={<Notifications />} />
-              <Route path="/user-profile" element={<UserProfile />} />
+            {/* Protected routes — must be logged in */}
+            <Route element={<ProtectedRoute />}>
+              <Route element={<AppLayout><Outlet /></AppLayout>}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/products/:id" element={<ProductDetail />} />
+                <Route path="/record-sale" element={<RecordSale />} />
+                <Route path="/transactions" element={<Transactions />} />
+                <Route path="/transactions/:id" element={<TransactionDetail />} />
+                <Route path="/customers" element={<Customers />} />
+                <Route path="/customers/new" element={<AddCustomer />} />
+                <Route path="/customers/:id" element={<CustomerDetail />} />
+                <Route path="/reports" element={<Reports />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/notifications" element={<Notifications />} />
+                <Route path="/user-profile" element={<UserProfile />} />
+              </Route>
             </Route>
-          </Route>
 
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </BrowserRouter>
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </BrowserRouter>
+      </NotificationProvider>
     </AuthProvider>
   );
 }

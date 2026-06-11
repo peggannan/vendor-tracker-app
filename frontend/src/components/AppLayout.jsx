@@ -3,14 +3,16 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { logout } from "../api/api";
+import { useNotifications } from "../context/NotificationContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faHouse, faBoxesStacked, faReceipt,
   faUsers, faChartBar, faGear, faMoon,
   faSun, faRightFromBracket, faBell,
-  faUserCircle, faPlus
+  faUserCircle, faPlus, faArrowRight, faTrash, faTriangleExclamation, faBell as faBellSolid
 } from "@fortawesome/free-solid-svg-icons";
 import logo from "../assets/logo.png";
+import { formatNotificationDateTime } from "../utils/notifications";
 
 const navItems = [
   { to: "/dashboard", label: "Home", icon: faHouse },
@@ -29,6 +31,12 @@ const bottomItems = [
 export default function AppLayout({ children }) {
   const { user, clearAuth } = useAuth();
   const { dark, toggle } = useTheme();
+  const {
+    unreadCount,
+    notifications,
+    markAsRead,
+    removeNotification,
+  } = useNotifications() ?? {};
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -39,6 +47,49 @@ export default function AppLayout({ children }) {
 
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
+      {Array.isArray(notifications) && notifications.some((notification) => !notification.read) && (
+        <div className="fixed top-20 right-4 left-4 z-[60] flex flex-col gap-3 pointer-events-none lg:left-auto lg:w-96">
+          {notifications.filter((notification) => !notification.read).slice(0, 3).map((notification) => (
+            <div
+              key={notification.id}
+              className={`pointer-events-auto rounded-2xl border bg-white dark:bg-gray-800 shadow-2xl p-4 ${notification.type === "low_stock" ? "border-red-200 dark:border-red-900/60" : "border-brand-200 dark:border-brand-900/60"}`}
+            >
+              <div className="flex items-start gap-3">
+                <div className={`w-10 h-10 rounded-full ${notification.type === "low_stock" ? "bg-red-100 dark:bg-red-900" : "bg-brand-100"} flex items-center justify-center flex-shrink-0`}>
+                  <FontAwesomeIcon
+                    icon={notification.type === "low_stock" ? faTriangleExclamation : faBellSolid}
+                    className={`${notification.type === "low_stock" ? "text-red-500" : "text-brand-600"} text-sm`}
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm text-gray-800 dark:text-gray-100">{notification.title}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{notification.message}</p>
+                  <p className="text-[11px] text-gray-400 mt-2">{formatNotificationDateTime(notification.createdAt)}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeNotification?.(notification.id)}
+                  className="text-gray-300 hover:text-gray-500"
+                  aria-label="Dismiss notification"
+                >
+                  <FontAwesomeIcon icon={faTrash} />
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  markAsRead?.(notification.id);
+                  navigate(notification.link || "/notifications");
+                }}
+                className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 text-white text-xs font-semibold py-2"
+              >
+                Open
+                <FontAwesomeIcon icon={faArrowRight} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* ── DESKTOP SIDEBAR ── only visible on lg+ */}
       <aside className="hidden lg:flex flex-col w-64 fixed top-0 left-0 h-full bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 z-20">
@@ -111,6 +162,11 @@ export default function AppLayout({ children }) {
                     className={`w-4 ${isActive ? "text-brand-600" : "text-gray-400"}`}
                   />
                   {label}
+                  {label === "Notifications" && unreadCount > 0 && (
+                    <span className="ml-auto min-w-5 h-5 px-1.5 rounded-full bg-brand-600 text-white text-[10px] font-bold flex items-center justify-center">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
                   {isActive && (
                     <span className="ml-auto w-1.5 h-1.5 rounded-full bg-brand-600" />
                   )}

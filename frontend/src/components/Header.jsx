@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getProducts } from "../api/api";
 import HamburgerMenu from "./HamburgerMenu";
+import { useNotifications } from "../context/NotificationContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faMagnifyingGlass, faBell, faXmark } from "@fortawesome/free-solid-svg-icons";
 import logos from "../assets/logos.png";
@@ -15,6 +16,7 @@ export default function Header({ showSearch = true }) {
   const [searchResults, setSearchResults] = useState([]);
   const searchRef = useRef(null);
   const { user } = useAuth();
+  const { unreadCount } = useNotifications() ?? {};
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -126,9 +128,11 @@ export default function Header({ showSearch = true }) {
           >
             <FontAwesomeIcon icon={faBell} className="text-gray-600 dark:text-gray-300 text-sm" />
             {/* Badge */}
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-brand-600 rounded-full flex items-center justify-center text-[9px] text-white font-bold">
-              2
-            </span>
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-brand-600 rounded-full flex items-center justify-center text-[9px] text-white font-bold">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
           </button>
 
         </div>

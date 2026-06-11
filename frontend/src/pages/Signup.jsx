@@ -148,7 +148,10 @@ export default function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (form.password !== form.confirm) return setError("Passwords do not match");
-    if (form.password.length < 8) return setError("Password must be at least 8 characters");
+    const passwordStrengthRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/;
+    if (!passwordStrengthRegex.test(form.password)) {
+      return setError("Password must be at least 8 characters and include uppercase, lowercase, and a special character");
+    }
     setLoading(true);
     setError("");
     try {
@@ -236,6 +239,9 @@ export default function Signup() {
               <button type="button" onClick={() => setShowPassword((s) => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
                 <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
               </button>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Password must be at least 8 characters and include uppercase, lowercase, and a special character.
+              </p>
             </div>
           </div>
 
