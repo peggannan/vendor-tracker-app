@@ -67,7 +67,7 @@
 
 
 // src/pages/SalesHistory.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getSalesHistory } from "../api/api";
 import PageHeader from "../components/PageHeader";
@@ -120,6 +120,10 @@ function PaymentBadge({ method }) {
 
 const STATUS_FILTERS = ["All", "Approved", "Pending", "Rejected"];
 const PAYMENT_FILTERS = ["All", "Cash", "Card", "Mobile Money", "Credit"];
+const SORT_OPTIONS = [
+  { value: "desc", label: "Newest first" },
+  { value: "asc", label: "Oldest first" },
+];
 
 export default function SalesHistory() {
   const [sales, setSales] = useState([]);
@@ -127,6 +131,8 @@ export default function SalesHistory() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [paymentFilter, setPaymentFilter] = useState("All");
   const [search, setSearch] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
+  const [sortOrder, setSortOrder] = useState("desc");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -136,16 +142,27 @@ export default function SalesHistory() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = sales.filter((s) => {
-    const matchStatus = statusFilter === "All" || s.status === statusFilter;
-    const matchPayment = paymentFilter === "All" ||
-      s.payment_method?.toLowerCase() === paymentFilter.toLowerCase();
-    const matchSearch = search === "" ||
-      s.customer_name?.toLowerCase().includes(search.toLowerCase()) ||
-      s.product_name?.toLowerCase().includes(search.toLowerCase()) ||
-      String(s.id).includes(search);
-    return matchStatus && matchPayment && matchSearch;
-  });
+  const filtered = useMemo(() => {
+    const normalizedSearch = search.toLowerCase();
+
+    return [...sales]
+      .filter((s) => {
+        const matchStatus = statusFilter === "All" || s.status === statusFilter;
+        const matchPayment = paymentFilter === "All" ||
+          s.payment_method?.toLowerCase() === paymentFilter.toLowerCase();
+        const matchSearch = search === "" ||
+          s.customer_name?.toLowerCase().includes(normalizedSearch) ||
+          s.product_name?.toLowerCase().includes(normalizedSearch) ||
+          String(s.id).includes(search);
+        const matchDate = dateFilter === "" || s.created_at?.slice(0, 10) === dateFilter;
+        return matchStatus && matchPayment && matchSearch && matchDate;
+      })
+      .sort((left, right) => {
+        const leftTime = new Date(left.created_at || 0).getTime();
+        const rightTime = new Date(right.created_at || 0).getTime();
+        return sortOrder === "asc" ? leftTime - rightTime : rightTime - leftTime;
+      });
+  }, [sales, statusFilter, paymentFilter, search, dateFilter, sortOrder]);
 
   const totalSales = sales.reduce((sum, s) => sum + parseFloat(s.total || 0), 0);
   const avgBasket = sales.length ? (totalSales / sales.length).toFixed(0) : 0;
@@ -199,6 +216,38 @@ export default function SalesHistory() {
             onChange={(e) => setSearch(e.target.value)}
             className="bg-transparent text-xs text-gray-600 dark:text-gray-300 placeholder-gray-400 focus:outline-none w-full"
           />
+        </div>
+
+        {/* Date filter + sort */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-3 shadow-sm border border-gray-100 dark:border-gray-700">
+            <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+              Filter by Date
+            </label>
+            <input
+              type="date"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm text-gray-700 dark:text-gray-200 focus:outline-none focus:border-brand-500"
+            />
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-3 shadow-sm border border-gray-100 dark:border-gray-700">
+            <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+              Sort by Date
+            </label>
+            <select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+              className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm text-gray-700 dark:text-gray-200 focus:outline-none focus:border-brand-500"
+            >
+              {SORT_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Filters */}

@@ -1,5 +1,5 @@
 // src/pages/Dashboard.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getDashboard, getSalesHistory } from "../api/api";
 import { useLocation } from "react-router-dom";
@@ -7,6 +7,36 @@ import Header from "../components/Header";
 import Navbar from "../components/Navbar";
 import { ListSkeleton, StatSkeleton } from "../components/Skeleton";
 import EmptyState from "../components/EmptyState";
+
+function formatCurrency(value) {
+  const amount = Number.parseFloat(value ?? 0);
+  return Number.isFinite(amount) ? amount.toFixed(2) : "0.00";
+}
+
+function getWeeklySalesBuckets(sales = []) {
+  const today = new Date();
+  const buckets = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (6 - index));
+    const key = date.toISOString().slice(0, 10);
+    return {
+      key,
+      label: date.toLocaleDateString("en-US", { weekday: "short" }),
+      amount: 0,
+    };
+  });
+
+  sales.forEach((sale) => {
+    if (sale.status !== "Approved" || !sale.created_at) return;
+    const saleDate = sale.created_at.slice(0, 10);
+    const bucket = buckets.find((entry) => entry.key === saleDate);
+    if (bucket) {
+      bucket.amount += Number.parseFloat(sale.total ?? 0) || 0;
+    }
+  });
+
+  return buckets;
+}
 
 // Status badge component
 function StatusBadge({ status }) {
@@ -83,6 +113,11 @@ export default function Dashboard() {
     day: "numeric", month: "short", year: "numeric"
   });
 
+  const weeklyChart = useMemo(() => getWeeklySalesBuckets(sales), [sales]);
+  const weeklyChartMax = Math.max(...weeklyChart.map((entry) => entry.amount), 1);
+  const weeklyChange = Number.parseFloat(stats?.weekly_change ?? 0);
+  const weeklyChangeLabel = `${weeklyChange > 0 ? "+" : ""}${Math.abs(weeklyChange).toFixed(1)}%`;
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 max-w-lg mx-auto lg:max-w-full">
       <Header />
@@ -119,26 +154,27 @@ export default function Dashboard() {
               {/* Today */}
               <div className="bg-brand-600 rounded-2xl p-4">
                 <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider mb-1">Today</p>
-                <p className="text-xl font-bold text-white">₵{stats?.total_revenue ?? 0}</p>
+                <p className="text-xl font-bold text-white">₵{formatCurrency(stats?.total_revenue)}</p>
                 <p className="text-xs text-white/60 mt-0.5">Daily Total</p>
               </div>
 
               {/* This Week */}
               <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">This Week</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-white">₵{stats?.weekly_revenue ?? 0}</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">₵{formatCurrency(stats?.weekly_revenue)}</p>
                 <div className="flex items-center gap-1 mt-0.5">
-                  {(stats?.weekly_change ?? 0) >= 0 ? (
+                  {weeklyChange >= 0 ? (
                     <>
                       <svg width="10" height="10" fill="none" stroke="#16a34a" strokeWidth="2.5"><path d="M5 8V2M2 5l3-3 3 3" /></svg>
-                      <span className="text-xs text-green-500 font-medium">{stats?.weekly_change ?? 0}%</span>
+                      <span className="text-xs text-green-500 font-medium">{weeklyChangeLabel}</span>
                     </>
                   ) : (
                     <>
                       <svg width="10" height="10" fill="none" stroke="#dc2626" strokeWidth="2.5"><path d="M5 2v6M2 5l3 3 3-3" /></svg>
-                      <span className="text-xs text-red-500 font-medium">{stats?.weekly_change ?? 0}%</span>
+                      <span className="text-xs text-red-500 font-medium">{weeklyChangeLabel}</span>
                     </>
                   )}
+                  <span className="text-[10px] text-gray-400">vs last week</span>
                 </div>
               </div>
 
@@ -208,6 +244,40 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+
+        {/* Weekly Sales Chart */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 mb-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Weekly Sales</p>
+              <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 mt-1">Last 7 days revenue</p>
+            </div>
+            <p className="text-xs text-gray-400">₵{formatCurrency(weeklyChart.reduce((sum, entry) => sum + entry.amount, 0))}</p>
+          </div>
+
+          <div className="flex items-end gap-3 h-44">
+            {weeklyChart.map((entry) => {
+              const height = `${Math.max((entry.amount / weeklyChartMax) * 100, entry.amount > 0 ? 10 : 4)}%`;
+              return (
+                <div key={entry.key} className="flex-1 flex flex-col items-center justify-end gap-2 min-w-0">
+                  <div className="w-full flex items-end justify-center h-32">
+                    <div className="w-full max-w-[28px] h-full rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden flex items-end">
+                      <div
+                        className="w-full rounded-full bg-gradient-to-t from-brand-600 to-brand-400 transition-all duration-300"
+                        style={{ height }}
+                        title={`${entry.label}: ₵${formatCurrency(entry.amount)}`}
+                      />
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[11px] font-semibold text-gray-600 dark:text-gray-300">{entry.label}</p>
+                    <p className="text-[10px] text-gray-400">₵{formatCurrency(entry.amount)}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
         {/* Transaction History */}
         <div className="flex items-center justify-between mb-3">

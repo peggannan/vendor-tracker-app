@@ -48,11 +48,11 @@ export default function AppLayout({ children }) {
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
       {Array.isArray(notifications) && notifications.some((notification) => !notification.read) && (
-        <div className="fixed top-20 right-4 left-4 z-[60] flex flex-col gap-3 pointer-events-none lg:left-auto lg:w-96">
+        <div className="fixed top-20 right-4 left-4 z-[60] flex max-h-[calc(100vh-6rem)] flex-col gap-3 overflow-y-auto pr-1 pointer-events-none lg:left-auto lg:w-96">
           {notifications.filter((notification) => !notification.read).slice(0, 3).map((notification) => (
             <div
               key={notification.id}
-              className={`pointer-events-auto rounded-2xl border bg-white dark:bg-gray-800 shadow-2xl p-4 ${notification.type === "low_stock" ? "border-red-200 dark:border-red-900/60" : "border-brand-200 dark:border-brand-900/60"}`}
+              className={`pointer-events-auto rounded-2xl border bg-white dark:bg-gray-800 shadow-2xl p-4 flex-shrink-0 ${notification.type === "low_stock" ? "border-red-200 dark:border-red-900/60" : "border-brand-200 dark:border-brand-900/60"}`}
             >
               <div className="flex items-start gap-3">
                 <div className={`w-10 h-10 rounded-full ${notification.type === "low_stock" ? "bg-red-100 dark:bg-red-900" : "bg-brand-100"} flex items-center justify-center flex-shrink-0`}>
