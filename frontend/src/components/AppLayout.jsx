@@ -19,6 +19,7 @@ const navItems = [
   { to: "/products", label: "Stock", icon: faBoxesStacked },
   { to: "/transactions", label: "Transactions", icon: faReceipt },
   { to: "/customers", label: "Customers", icon: faUsers },
+  { to: "/credits", label: "Credits", icon: faReceipt },
   { to: "/reports", label: "Reports", icon: faChartBar },
 ];
 

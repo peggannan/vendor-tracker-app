@@ -14,6 +14,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
 import RecordSale from "./pages/RecordSale";
+import Credits from "./pages/Credits";
 import Transactions from "./pages/Transactions";
 import Customers from "./pages/Customers";
 import CustomerDetail from "./pages/CustomerDetail";
@@ -46,6 +47,7 @@ export default function App() {
                 <Route path="/record-sale" element={<RecordSale />} />
                 <Route path="/transactions" element={<Transactions />} />
                 <Route path="/transactions/:id" element={<TransactionDetail />} />
+                <Route path="/credits" element={<Credits />} />
                 <Route path="/customers" element={<Customers />} />
                 <Route path="/customers/new" element={<AddCustomer />} />
                 <Route path="/customers/:id" element={<CustomerDetail />} />
