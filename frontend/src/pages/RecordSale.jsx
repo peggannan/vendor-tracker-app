@@ -428,18 +428,31 @@ import Navbar from "../components/Navbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faCheck } from "@fortawesome/free-solid-svg-icons";
 
-const PAYMENT_METHODS = ["CASH", "MOBILE MONEY"];
+const PAYMENT_METHODS = ["CASH", "MOBILE MONEY", "CARD", "CREDIT"];
 const CATEGORIES = ["Groceries", "Beverages", "Electronics", "Apparel", "General"];
 
 function QuickAddProduct({ onAdd, onClose }) {
   const [form, setForm] = useState({ name: "", price: "", stock: "", category: "General", sku: "" });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!imageFile) {
+      setImagePreview("");
+      return undefined;
+    }
+
+    const previewUrl = URL.createObjectURL(imageFile);
+    setImagePreview(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [imageFile]);
 
   const handleSubmit = async () => {
     if (!form.name || !form.price) return alert("Name and price are required");
     setLoading(true);
     try {
-      const { data } = await addProduct(form);
+      const { data } = await addProduct({ ...form, image_file: imageFile });
       onAdd(data.product);
     } catch {
       alert("Could not add product");
@@ -472,13 +485,29 @@ function QuickAddProduct({ onAdd, onClose }) {
           ))}
           <div>
             <label className="text-xs text-gray-500 mb-1 block">Category</label>
-            <select
+            <input
+              list="quick-add-product-categories"
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
               className="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500"
-            >
-              {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
-            </select>
+            />
+            <datalist id="quick-add-product-categories">
+              {CATEGORIES.map((c) => <option key={c} value={c} />)}
+            </datalist>
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">Product Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+              className="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500"
+            />
+            {imagePreview && (
+              <div className="mt-2 h-24 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
+                <img src={imagePreview} alt={form.name || "Product preview"} className="w-full h-full object-cover" />
+              </div>
+            )}
           </div>
         </div>
         <div className="flex gap-3 mt-4">
@@ -578,6 +607,9 @@ export default function RecordSale() {
 
   const handleSubmit = async () => {
     if (!form.product_id) return alert("Please select a product");
+    if (form.payment_method === "CREDIT" && !form.customer_id) {
+      return alert("Select a customer for credit sales");
+    }
     setLoading(true);
     try {
       await recordSale({ ...form, total });

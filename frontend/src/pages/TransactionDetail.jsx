@@ -1,7 +1,7 @@
 // src/pages/TransactionDetail.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getSalesHistory } from "../api/api";
+import { getSalesHistory, updateSaleStatus } from "../api/api";
 import PageHeader from "../components/PageHeader";
 import Navbar from "../components/Navbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,19 +9,24 @@ import { faCalendar, faUser, faBox, faCreditCard, faHashtag, faCircleCheck, faCi
 
 function StatusBadge({ status }) {
   const styles = {
-    Approved: "bg-green-50 text-green-600 border border-green-200",
-    Rejected: "bg-red-50 text-red-500 border border-red-200",
-    Pending: "bg-yellow-50 text-yellow-600 border border-yellow-200",
+    completed: "bg-green-50 text-green-600 border border-green-200",
+    cancelled: "bg-red-50 text-red-500 border border-red-200",
+    pending: "bg-yellow-50 text-yellow-600 border border-yellow-200",
   };
   const icons = {
-    Approved: faCircleCheck,
-    Rejected: faCircleXmark,
-    Pending: faClock,
+    completed: faCircleCheck,
+    cancelled: faCircleXmark,
+    pending: faClock,
+  };
+  const labelMap = {
+    completed: "Completed",
+    cancelled: "Cancelled",
+    pending: "Pending",
   };
   return (
-    <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold ${styles[status] ?? styles.Pending}`}>
+    <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold ${styles[status] ?? styles.pending}`}>
       <FontAwesomeIcon icon={icons[status] ?? faClock} />
-      {status}
+      {labelMap[status] ?? status}
     </span>
   );
 }
@@ -45,6 +50,8 @@ export default function TransactionDetail() {
   const navigate = useNavigate();
   const [sale, setSale] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState("pending");
+  const [savingStatus, setSavingStatus] = useState(false);
 
   useEffect(() => {
     getSalesHistory()
@@ -52,6 +59,7 @@ export default function TransactionDetail() {
         const sales = data.sales ?? data.results ?? data ?? [];
         const found = sales.find((s) => s.id == id);
         setSale(found);
+        setStatus(found?.status ?? "pending");
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -75,6 +83,21 @@ export default function TransactionDetail() {
     </div>
   );
 
+  const handleStatusSave = async () => {
+    setSavingStatus(true);
+    try {
+      const { data } = await updateSaleStatus(id, status);
+      const updatedSale = data.sale ?? data;
+      setSale(updatedSale);
+      setStatus(updatedSale.status ?? status);
+    } catch (err) {
+      alert(err.response?.data?.error?.message || "Could not update transaction status");
+      setStatus(sale.status ?? "pending");
+    } finally {
+      setSavingStatus(false);
+    }
+  };
+
   const rows = [
     { icon: faHashtag, label: "Transaction ID", value: `TX-${sale.id}` },
     { icon: faCalendar, label: "Date", value: sale.created_at?.slice(0, 10) },
@@ -96,7 +119,31 @@ export default function TransactionDetail() {
           <p className="text-white font-black text-4xl mb-3">₵{sale.total}</p>
           <div className="flex items-center justify-center gap-2">
             <PaymentBadge method={sale.payment_method ?? "CASH"} />
-            <StatusBadge status={sale.status ?? "Approved"} />
+            <StatusBadge status={sale.status ?? "completed"} />
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 mb-4">
+          <label className="text-sm font-semibold text-gray-700 dark:text-gray-200 block mb-2">
+            Transaction Status
+          </label>
+          <div className="flex gap-2 flex-wrap items-center">
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="flex-1 min-w-[180px] bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm text-gray-700 dark:text-gray-100 focus:outline-none focus:border-brand-500"
+            >
+              <option value="completed">Completed</option>
+              <option value="pending">Pending</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <button
+              onClick={handleStatusSave}
+              disabled={savingStatus || status === sale.status}
+              className="px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold disabled:opacity-60"
+            >
+              {savingStatus ? "Saving..." : "Update Status"}
+            </button>
           </div>
         </div>
 

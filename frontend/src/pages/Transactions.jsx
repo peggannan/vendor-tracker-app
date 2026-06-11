@@ -80,26 +80,36 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 function StatusBadge({ status }) {
   const styles = {
-    Approved: "bg-green-50 text-green-600 border border-green-200",
-    Rejected: "bg-red-50 text-red-500 border border-red-200",
-    Pending: "bg-yellow-50 text-yellow-600 border border-yellow-200",
+    completed: "bg-green-50 text-green-600 border border-green-200",
+    cancelled: "bg-red-50 text-red-500 border border-red-200",
+    pending: "bg-yellow-50 text-yellow-600 border border-yellow-200",
   };
   const icons = {
-    Approved: (
+    completed: (
       <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5">
         <path d="M9 2.5L4.5 8 2 5.5" />
       </svg>
     ),
-    Rejected: (
+    cancelled: (
       <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5">
         <path d="M8.5 2.5l-6 6M2.5 2.5l6 6" />
       </svg>
     ),
+    pending: (
+      <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <path d="M5 2.5v4l2.5 1.5" />
+      </svg>
+    ),
+  };
+  const labelMap = {
+    completed: "Completed",
+    cancelled: "Cancelled",
+    pending: "Pending",
   };
   return (
-    <span className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${styles[status] ?? styles.Pending}`}>
-      {icons[status]}
-      {status}
+    <span className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${styles[status] ?? styles.pending}`}>
+      {icons[status] ?? icons.pending}
+      {labelMap[status] ?? status}
     </span>
   );
 }
@@ -118,7 +128,7 @@ function PaymentBadge({ method }) {
   );
 }
 
-const STATUS_FILTERS = ["All", "Approved", "Pending", "Rejected"];
+const STATUS_FILTERS = ["All", "completed", "pending", "cancelled"];
 const PAYMENT_FILTERS = ["All", "Cash", "Card", "Mobile Money", "Credit"];
 const SORT_OPTIONS = [
   { value: "desc", label: "Newest first" },
@@ -166,7 +176,7 @@ export default function SalesHistory() {
 
   const totalSales = sales.reduce((sum, s) => sum + parseFloat(s.total || 0), 0);
   const avgBasket = sales.length ? (totalSales / sales.length).toFixed(0) : 0;
-  const pendingCount = sales.filter((s) => s.status === "Pending").length;
+  const pendingCount = sales.filter((s) => s.status === "pending").length;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 max-w-lg mx-auto lg:max-w-full">
@@ -270,7 +280,7 @@ export default function SalesHistory() {
                     : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300"
                 }`}
               >
-                {f}
+                {f === "completed" ? "Completed" : f === "cancelled" ? "Cancelled" : f === "pending" ? "Pending" : f}
               </button>
             ))}
           </div>

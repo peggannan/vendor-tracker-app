@@ -15,6 +15,7 @@ from .serializers import (
 
 from apps.products.models import Product
 from apps.customers.models import Customer
+from apps.credits.models import Credit
 
 
 # Create your views here.
@@ -90,6 +91,13 @@ class SaleListCreateView(APIView):
                         'message': 'Customer not found'
                     }
                 }, status=status.HTTP_404_NOT_FOUND)
+        elif payment_method == 'credit':
+            return Response({
+                'error': {
+                    'code': 'VALIDATION_ERROR',
+                    'message': {'customer_id': ['Customer is required for credit sales']}
+                }
+            }, status=status.HTTP_400_BAD_REQUEST)
             
         #validating all products before touching the db
         products = []
@@ -147,6 +155,15 @@ class SaleListCreateView(APIView):
                     product.stock_quantity -= quantity
                     product.save()
 
+                if payment_method == 'credit' and customer:
+                    Credit.objects.create(
+                        user=request.user,
+                        customer=customer,
+                        sale=sale,
+                        amount_owed=sale_total,
+                        amount_paid=0,
+                    )
+
         except Exception as e:
             return Response({
                 'error': {
@@ -186,6 +203,67 @@ class SaleDetailView(APIView):
         return Response({
             'data': serializer.data
         }, status=status.HTTP_200_OK)
+
+    def patch(self, request, pk):
+        sale = self.get_object(pk, request.user)
+        if not sale:
+            return Response({
+                'error': {
+                    'code': 'NOT_FOUND',
+                    'message': 'Sale not found'
+                }
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        new_status = request.data.get('status', '').lower()
+        allowed_statuses = {'completed', 'pending', 'cancelled'}
+        if new_status not in allowed_statuses:
+            return Response({
+                'error': {
+                    'code': 'VALIDATION_ERROR',
+                    'message': {'status': ['Status must be completed, pending, or cancelled']}
+                }
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if sale.status == new_status:
+            return Response({'data': SaleSerializer(sale).data}, status=status.HTTP_200_OK)
+
+        try:
+            with transaction.atomic():
+                sale_items = list(sale.items.select_related('product').all())
+
+                if sale.status != 'cancelled' and new_status == 'cancelled':
+                    for item in sale_items:
+                        if item.product:
+                            item.product.stock_quantity += item.quantity
+                            item.product.save()
+
+                if sale.status == 'cancelled' and new_status != 'cancelled':
+                    for item in sale_items:
+                        if not item.product:
+                            continue
+                        if item.product.stock_quantity < item.quantity:
+                            return Response({
+                                'error': {
+                                    'code': 'VALIDATION_ERROR',
+                                    'message': f'Not enough stock to restore {item.product_name}'
+                                }
+                            }, status=status.HTTP_400_BAD_REQUEST)
+                        item.product.stock_quantity -= item.quantity
+                        item.product.save()
+
+                sale.status = new_status
+                sale.cancelled_at = timezone.now() if new_status == 'cancelled' else None
+                sale.save()
+        except Exception:
+            return Response({
+                'error': {
+                    'code': 'SERVER_ERROR',
+                    'message': 'Something went wrong while updating the sale'
+                }
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        serializer = SaleSerializer(sale)
+        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
     
 
 class SaleCancelView(APIView):

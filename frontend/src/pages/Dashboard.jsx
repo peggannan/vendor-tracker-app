@@ -41,26 +41,36 @@ function getWeeklySalesBuckets(sales = []) {
 // Status badge component
 function StatusBadge({ status }) {
   const styles = {
-    Approved: "bg-green-50 text-green-600 border border-green-200",
-    Rejected: "bg-red-50 text-red-500 border border-red-200",
-    Pending: "bg-yellow-50 text-yellow-600 border border-yellow-200",
+    completed: "bg-green-50 text-green-600 border border-green-200",
+    cancelled: "bg-red-50 text-red-500 border border-red-200",
+    pending: "bg-yellow-50 text-yellow-600 border border-yellow-200",
   };
   const icons = {
-    Approved: (
+    completed: (
       <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5">
         <path d="M10 3L5 8.5 2 5.5" />
       </svg>
     ),
-    Rejected: (
+    cancelled: (
       <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5">
         <path d="M9 3L3 9M3 3l6 6" />
       </svg>
     ),
+    pending: (
+      <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <path d="M5 2.5v4l2.5 1.5" />
+      </svg>
+    ),
+  };
+  const labelMap = {
+    completed: "Completed",
+    cancelled: "Cancelled",
+    pending: "Pending",
   };
   return (
-    <span className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${styles[status] ?? styles.Pending}`}>
-      {icons[status]}
-      {status}
+    <span className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${styles[status] ?? styles.pending}`}>
+      {icons[status] ?? icons.pending}
+      {labelMap[status] ?? status}
     </span>
   );
 }
@@ -362,7 +372,7 @@ export default function Dashboard() {
                       {sale.customer_name ?? "—"}
                     </span>
                   </p>
-                  <StatusBadge status={sale.status ?? "Approved"} />
+                  <StatusBadge status={sale.status ?? "completed"} />
                 </div>
               </div>
             ))}

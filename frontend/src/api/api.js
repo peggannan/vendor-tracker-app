@@ -396,8 +396,8 @@ export const recordSale = async (data) => {
   const paymentMap = {
     "CASH": "cash",
     "MOBILE MONEY": "momo",
-    "CARD": "cash",
-    "CREDIT": "cash",
+    "CARD": "card",
+    "CREDIT": "credit",
   };
 
   const res = await api.post("/api/v1/sales/", {
@@ -409,6 +409,16 @@ export const recordSale = async (data) => {
     }],
   });
 
+  return { data: { sale: res.data.data ?? res.data } };
+};
+
+export const updateSaleStatus = async (id, status) => {
+  if (USE_MOCK) {
+    await delay();
+    return { data: { sale: { id, status } } };
+  }
+
+  const res = await api.patch(`/api/v1/sales/${id}/`, { status });
   return { data: { sale: res.data.data ?? res.data } };
 };
 
@@ -427,6 +437,12 @@ export const getSalesHistory = async () => {
     const firstItem = s.items?.[0];   // SaleListSerializer already includes items with product_name
     const currentProductId = firstItem?.product_id ?? s.product_id ?? null;
     const currentProduct = currentProducts.get(String(currentProductId));
+    const normalizedStatus = (() => {
+      const rawStatus = (s.status ?? "").toLowerCase();
+      if (rawStatus === "completed" || rawStatus === "approved") return "completed";
+      if (rawStatus === "cancelled" || rawStatus === "canceled" || rawStatus === "rejected") return "cancelled";
+      return "pending";
+    })();
     return {
       id: s.id,
       customer_name: s.customer_name ?? null,
@@ -441,11 +457,7 @@ export const getSalesHistory = async () => {
         ? "MOBILE MONEY"
         : s.payment_method?.toUpperCase() ?? "CASH",
       staff_name: s.customer_name ?? null,
-      status: s.status === "completed"
-        ? "Approved"
-        : s.status === "cancelled"
-        ? "Rejected"
-        : "Pending",
+      status: normalizedStatus,
       created_at: s.created_at,
       items: s.items ?? [],
     };
@@ -512,14 +524,14 @@ export const getDashboard = async () => {
 
     const today = new Date().toISOString().slice(0, 10);
     const todaySales = sales.filter((s) =>
-      s.created_at?.slice(0, 10) === today && s.status === "Approved"
+      s.created_at?.slice(0, 10) === today && s.status === "completed"
     );
     const total_revenue = todaySales.reduce((sum, s) => sum + parseFloat(s.total || 0), 0);
 
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
     const weeklySales = sales.filter((s) =>
-      new Date(s.created_at) >= weekAgo && s.status === "Approved"
+      new Date(s.created_at) >= weekAgo && s.status === "completed"
     );
     const weekly_revenue = weeklySales.reduce((sum, s) => sum + parseFloat(s.total || 0), 0);
 
@@ -527,7 +539,7 @@ export const getDashboard = async () => {
     prevWeekStart.setDate(prevWeekStart.getDate() - 14);
     const prevWeekSales = sales.filter((s) => {
       const d = new Date(s.created_at);
-      return d >= prevWeekStart && d < weekAgo && s.status === "Approved";
+      return d >= prevWeekStart && d < weekAgo && s.status === "completed";
     });
     const prev_weekly = prevWeekSales.reduce((sum, s) => sum + parseFloat(s.total || 0), 0);
     const weekly_change = prev_weekly > 0
@@ -536,7 +548,7 @@ export const getDashboard = async () => {
 
     const productMap = {};
     sales.forEach((s) => {
-      if (s.status !== "Approved") return;
+      if (s.status !== "completed") return;
       if (s.items?.length > 0) {
         s.items.forEach((item) => {
           const name = item.product_name;

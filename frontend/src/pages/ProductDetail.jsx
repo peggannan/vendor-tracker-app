@@ -1,7 +1,7 @@
 // src/pages/ProductDetail.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getProducts, editProduct, deleteProduct } from "../api/api";
+import { getProducts, editProduct, deleteProduct, restockProduct } from "../api/api";
 import PageHeader from "../components/PageHeader";
 import Navbar from "../components/Navbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -21,6 +21,8 @@ export default function ProductDetail() {
   const [form, setForm] = useState({});
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
+  const [restockForm, setRestockForm] = useState({ quantity: "", cost_price: "" });
+  const [restocking, setRestocking] = useState(false);
   const [saving, setSaving] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -79,6 +81,31 @@ const handleSave = async () => {
       navigate("/products");
     } catch {
       alert("Could not delete product");
+    }
+  };
+
+  const handleRestock = async () => {
+    if (!restockForm.quantity || Number(restockForm.quantity) <= 0) {
+      return alert("Enter a valid restock quantity");
+    }
+
+    setRestocking(true);
+    try {
+      const res = await restockProduct(id, Number(restockForm.quantity), restockForm.cost_price || undefined);
+      const updatedStock = res.data?.data?.stock_quantity ?? Number(product.stock ?? 0) + Number(restockForm.quantity);
+      const updatedProduct = {
+        ...product,
+        ...form,
+        stock: updatedStock,
+        base_cost: res.data?.data?.cost_price ?? form.base_cost,
+      };
+      setProduct(updatedProduct);
+      setForm(updatedProduct);
+      setRestockForm({ quantity: "", cost_price: "" });
+    } catch (err) {
+      alert(err.response?.data?.error?.message || "Could not restock product");
+    } finally {
+      setRestocking(false);
     }
   };
 
@@ -289,6 +316,47 @@ const handleSave = async () => {
                   className="w-full bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none disabled:opacity-70 focus:ring-2 focus:ring-brand-500"
                 />
               </div>
+            </div>
+
+            {/* Restock */}
+            <div className="bg-gray-50 dark:bg-gray-700/60 rounded-xl p-4 border border-gray-100 dark:border-gray-600">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">Restock Product</p>
+                  <p className="text-xs text-gray-400">Add quantity to current stock</p>
+                </div>
+                <p className="text-sm font-bold text-brand-600">Current: {form.stock ?? product.stock ?? 0}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Quantity to add</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={restockForm.quantity}
+                    onChange={(e) => setRestockForm({ ...restockForm, quantity: e.target.value })}
+                    className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">New cost price (optional)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={restockForm.cost_price}
+                    onChange={(e) => setRestockForm({ ...restockForm, cost_price: e.target.value })}
+                    className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500"
+                  />
+                </div>
+              </div>
+              <button
+                onClick={handleRestock}
+                disabled={restocking}
+                className="mt-3 w-full py-3 bg-brand-600 text-white rounded-xl font-semibold disabled:opacity-60"
+              >
+                {restocking ? "Restocking..." : "Add to Stock"}
+              </button>
             </div>
 
             {/* Expiry Date */}

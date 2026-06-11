@@ -12,6 +12,7 @@ class Sale(models.Model):
     ]
     STATUS_CHOICES = [
         ('completed', 'Completed'),
+        ('pending', 'Pending'),
         ('cancelled', 'Cancelled')
     ]
 
@@ -37,7 +38,7 @@ class Sale(models.Model):
         default='completed'
     )
     created_at = models.DateTimeField(auto_now_add=True)
-    cancelled_at = models.DateTimeField(auto_now_add=True)
+    cancelled_at = models.DateTimeField(null=True, blank=True)
 
 
     class Meta:
